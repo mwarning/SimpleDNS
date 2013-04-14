@@ -237,7 +237,7 @@ void print_hex(uchar* buf, size_t len)
 	printf("\n");
 }
 
-void rr_asString(struct ResourceRecord* rr)
+void print_resource_record(struct ResourceRecord* rr)
 {
 	int i;
 	while(rr)
@@ -314,7 +314,7 @@ void rr_asString(struct ResourceRecord* rr)
 	}
 }
 
-void query_asString(struct Message* msg)
+void print_query(struct Message* msg)
 {
 	printf("QUERY { ID: %02x", msg->id);
 	printf(". FIELDS: [ QR: %u, OpCode: %u ]", msg->qr, msg->opcode);
@@ -334,9 +334,9 @@ void query_asString(struct Message* msg)
 		q = q->next;
 	}
 
-	rr_asString(msg->answers);
-	rr_asString(msg->authorities);
-	rr_asString(msg->additionals);
+	print_resource_record(msg->answers);
+	print_resource_record(msg->authorities);
+	print_resource_record(msg->additionals);
 
 	printf("}\n");
 }
@@ -406,15 +406,11 @@ char* decode_domain_name(const uchar** buffer)
 		i += len;
 		j += len;
 	}
-	
+
 	name[j] = '\0';
-	
-	//printf("name: '%s'\n", name);
-	//msg->qName = strdup(name);
-	
+
 	*buffer += i + 1; //also jump over the last 0
-	//return buffer - buf;
-	
+
 	char* dup = (char*) gmalloc(j+1);
 	if(dup)
 	{
@@ -721,10 +717,14 @@ int main()
 		nbytes = decode_query(&msg, buffer, nbytes);
 		if(nbytes < 0)
 			continue;
+	
+		// print query
+		print_query(&msg);
 
-		query_asString(&msg);
 		resolver_process(&msg);
-		query_asString(&msg);
+
+		// print response
+		print_query(&msg);
 
 		nbytes = code_response(&msg, buffer);
 		if(nbytes < 0)
