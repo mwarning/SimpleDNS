@@ -1,15 +1,13 @@
 
 ### Introduction
 
-SimpleDSN is a very simplisting webserver.
-It was made for learning the basics of DNS
-and maybe more at some time.
+SimpleDNS is a very simple DNS server.<br />
+It was made to learn the basics of the DNS protocol.
 
 Features:
 * very small
 * single-threaded
-* simple functions for 
-* all necessary data structures in place to handle other queries
+* all necessary data structures for further features
 * very simplistic memory management
 * no full protection against malformed requests :|
 
