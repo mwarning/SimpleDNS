@@ -116,9 +116,9 @@ void* gmalloc(size_t size)
 // QuestionSection
 struct Question
 {
-    uchar* qName;
+	uchar* qName;
 	uint qType;
-    uint qClass;
+	uint qClass;
 	struct Question* next; // for linked list
 };
 
@@ -152,21 +152,21 @@ struct ResourceRecord
 struct Message
 {
 	uint id; // Identifier
-	
-	//flags
-    uint qr; // Query/Response Flag (0 = query, 1 = response)
-    uint opcode; // Operation Code
-    uint aa; // Authoritative Answer Flag (0 = non-authoritative, 1 = authoritative)
-    uint tc; // Truncation Flag
-    uint rd; // Recursion Desired
-    uint ra; // Recursion Available
-    uint rcode; // Response Code
 
-    uint qdCount; // Question Count
-    uint anCount; // Answer Record Count:
-    uint nsCount; // Authority Record Count
-    uint arCount; // Additional Record Count
-	
+	//flags
+	uint qr; // Query/Response Flag (0 = query, 1 = response)
+	uint opcode; // Operation Code
+	uint aa; // Authoritative Answer Flag (0 = non-authoritative, 1 = authoritative)
+	uint tc; // Truncation Flag
+	uint rd; // Recursion Desired
+	uint ra; // Recursion Available
+	uint rcode; // Response Code
+
+	uint qdCount; // Question Count
+	uint anCount; // Answer Record Count:
+	uint nsCount; // Authority Record Count
+	uint arCount; // Additional Record Count
+
 	// at least one question; questions are copied to response 1:1
 	struct Question* questions;
 
@@ -317,12 +317,12 @@ void rr_asString(struct ResourceRecord* rr)
 void query_asString(struct Message* msg)
 {
 	printf("QUERY { ID: %02x", msg->id);
-    printf(". FIELDS: [ QR: %u, OpCode: %u ]", msg->qr, msg->opcode);
-    printf(", QDcount: %u", msg->qdCount);
-    printf(", ANcount: %u", msg->anCount);
-    printf(", NScount: %u", msg->nsCount);
-    printf(", ARcount: %u,\n", msg->arCount);
-	
+	printf(". FIELDS: [ QR: %u, OpCode: %u ]", msg->qr, msg->opcode);
+	printf(", QDcount: %u", msg->qdCount);
+	printf(", ANcount: %u", msg->anCount);
+	printf(", NScount: %u", msg->nsCount);
+	printf(", ARcount: %u,\n", msg->arCount);
+
 	struct Question* q = msg->questions;
 	while(q)
 	{
@@ -337,8 +337,8 @@ void query_asString(struct Message* msg)
 	rr_asString(msg->answers);
 	rr_asString(msg->authorities);
 	rr_asString(msg->additionals);
-	
-    printf("}\n");
+
+	printf("}\n");
 }
 
 
@@ -349,32 +349,32 @@ void query_asString(struct Message* msg)
 int get16bits(const uchar** buffer)
 {
 	int value = (*buffer)[0];
-    value = value << 8;
-    value += (*buffer)[1];
-    (*buffer) += 2;
+	value = value << 8;
+	value += (*buffer)[1];
+	(*buffer) += 2;
 	return value;
 }
 
 void put8bits(uchar** buffer, uchar value)
 {
-    (*buffer)[0] = value;
-    (*buffer) += 1;
+	(*buffer)[0] = value;
+	(*buffer) += 1;
 }
 
 void put16bits(uchar** buffer, uint value)
 {
-    (*buffer)[0] = (value & 0xFF00) >> 8;
-    (*buffer)[1] = value & 0xFF;
-    (*buffer) += 2;
+	(*buffer)[0] = (value & 0xFF00) >> 8;
+	(*buffer)[1] = value & 0xFF;
+	(*buffer) += 2;
 }
 
 void put32bits(uchar** buffer, ulong value)
 {
-    (*buffer)[0] = (value & 0xFF000000) >> 24;
-    (*buffer)[1] = (value & 0xFF0000) >> 16;
-    (*buffer)[2] = (value & 0xFF00) >> 16;
-    (*buffer)[3] = (value & 0xFF) >> 16;
-    (*buffer) += 4;
+	(*buffer)[0] = (value & 0xFF000000) >> 24;
+	(*buffer)[1] = (value & 0xFF0000) >> 16;
+	(*buffer)[2] = (value & 0xFF00) >> 16;
+	(*buffer)[3] = (value & 0xFF) >> 16;
+	(*buffer) += 4;
 }
 
 /*
@@ -464,38 +464,38 @@ void code_domain_name(uchar** buffer, const uchar* domain)
 
 void decode_header(struct Message* msg, const uchar** buffer)
 {
-    msg->id = get16bits(buffer);
+	msg->id = get16bits(buffer);
 
-    uint fields = get16bits(buffer);
-    msg->qr = fields & QR_MASK;
-    msg->opcode = fields & OPCODE_MASK;
-    msg->aa = fields & AA_MASK;
+	uint fields = get16bits(buffer);
+	msg->qr = fields & QR_MASK;
+	msg->opcode = fields & OPCODE_MASK;
+	msg->aa = fields & AA_MASK;
 	msg->tc = fields & TC_MASK;
-    msg->rd = fields & RD_MASK;
-    msg->ra = fields & RA_MASK;
+	msg->rd = fields & RD_MASK;
+	msg->ra = fields & RA_MASK;
 	msg->rcode = fields & RCODE_MASK;
-	
 
-    msg->qdCount = get16bits(buffer);
-    msg->anCount = get16bits(buffer);
-    msg->nsCount = get16bits(buffer);
-    msg->arCount = get16bits(buffer);
+
+	msg->qdCount = get16bits(buffer);
+	msg->anCount = get16bits(buffer);
+	msg->nsCount = get16bits(buffer);
+	msg->arCount = get16bits(buffer);
 }
 
 void code_header(struct Message* msg, uchar** buffer)
 {
-    put16bits(buffer, msg->id);
+	put16bits(buffer, msg->id);
 
-    int fields = (msg->qr << 15);
-    fields += (msg->opcode << 14);
-    // TODO: insert the rest of the field 
-    fields += msg->rcode;
-    put16bits(buffer, fields);
+	int fields = (msg->qr << 15);
+	fields += (msg->opcode << 14);
+	// TODO: insert the rest of the field 
+	fields += msg->rcode;
+	put16bits(buffer, fields);
 
-    put16bits(buffer, msg->qdCount);
-    put16bits(buffer, msg->anCount);
-    put16bits(buffer, msg->nsCount);
-    put16bits(buffer, msg->arCount);
+	put16bits(buffer, msg->qdCount);
+	put16bits(buffer, msg->anCount);
+	put16bits(buffer, msg->nsCount);
+	put16bits(buffer, msg->arCount);
 }
 
 int decode_query(struct Message* msg, const uchar* buffer, int size)
@@ -543,8 +543,8 @@ void resolver_process(struct Message* msg)
 	msg->qr = 1; // Query/Response Flag (0 = query, 1 = response)
 	//msg->opcode; // Operation Code
 	//msg->aa; // Authoritative Answer Flag (0 = non-authoritative., 1 = authoritative)
-    //msg->tc; // Truncation Flag
-    //msg->rd; // Recursion Desired
+	//msg->tc; // Truncation Flag
+	//msg->rd; // Recursion Desired
 	//msg->ra  // Recursion Available
 	msg->rcode = Ok_ResponseType;
 
@@ -646,7 +646,7 @@ int code_resource_records(struct ResourceRecord* rr, uchar** buffer)
 
 int code_response(struct Message* msg, uchar* buffer) 
 {
-    const uchar* buf = buffer;
+	const uchar* buf = buffer;
 
 	code_header(msg, &buffer);
 
@@ -656,7 +656,7 @@ int code_response(struct Message* msg, uchar* buffer)
 		code_domain_name(&buffer, q->qName);
 		put16bits(&buffer, q->qType);
 		put16bits(&buffer, q->qClass);
-	
+
 		q = q->next;
 	}
 	
@@ -664,7 +664,7 @@ int code_response(struct Message* msg, uchar* buffer)
 	code_resource_records(msg->authorities, &buffer);
 	code_resource_records(msg->additionals, &buffer);
 
-    return buffer - buf;
+	return buffer - buf;
 }
 
 // Initialize a global buffer to simplify memory handling.
@@ -680,56 +680,56 @@ int main()
 {
 	// buffer for input/output binary packet
 	char buffer[BUF_SIZE];
-    struct sockaddr_in client_addr;
-    socklen_t addr_len = sizeof(struct sockaddr_in);
-    struct sockaddr_in addr;
-    int sock;
+	struct sockaddr_in client_addr;
+	socklen_t addr_len = sizeof(struct sockaddr_in);
+	struct sockaddr_in addr;
+	int sock;
 	int port = 9000;
-	
+
 	// buffer for response/request structures
 	gbuffer = malloc(2 * BUF_SIZE);
 	gbuffer_max_size = (2 * BUF_SIZE);
 	gbuffer_curr_size = 0;
 
-    struct Message msg;
+	struct Message msg;
 
-    addr.sin_family = AF_INET;
-    addr.sin_addr.s_addr = INADDR_ANY;
-    addr.sin_port = htons(port);
+	addr.sin_family = AF_INET;
+	addr.sin_addr.s_addr = INADDR_ANY;
+	addr.sin_port = htons(port);
 
-    sock = socket(AF_INET, SOCK_DGRAM, 0);
+	sock = socket(AF_INET, SOCK_DGRAM, 0);
 
 	int rc = bind(sock, (struct sockaddr*) &addr, addr_len);
 
-    if(rc != 0)
+	if(rc != 0)
 	{
-        printf("Could not bind: %s\n", strerror(errno));
+		printf("Could not bind: %s\n", strerror(errno));
 		return 1;
-    }
-	
+	}
+
 	printf("Listening on port %u.\n", port);
-	
-    while(1)
+
+	while(1)
 	{
 		gbuffer_curr_size = 0;
 
 		memset(&msg, 0, sizeof(struct Message));
 
-        int nbytes = recvfrom(sock, buffer, sizeof(buffer), 0,
-                     (struct sockaddr *) &client_addr, &addr_len);
-		
+		int nbytes = recvfrom(sock, buffer, sizeof(buffer), 0,
+			(struct sockaddr *) &client_addr, &addr_len);
+
 		nbytes = decode_query(&msg, buffer, nbytes);
 		if(nbytes < 0)
 			continue;
-		
+
 		query_asString(&msg);
-        resolver_process(&msg);
-        query_asString(&msg);
-	
-        nbytes = code_response(&msg, buffer);
+		resolver_process(&msg);
+		query_asString(&msg);
+
+		nbytes = code_response(&msg, buffer);
 		if(nbytes < 0)
 			continue;
-		
-        sendto(sock, buffer, nbytes, 0, (struct sockaddr*) &client_addr, addr_len);
-    }
+
+		sendto(sock, buffer, nbytes, 0, (struct sockaddr*) &client_addr, addr_len);
+	}
 }
