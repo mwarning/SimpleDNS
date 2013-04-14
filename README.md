@@ -30,7 +30,7 @@ $./sdns
 Listening on port 9000.
 </pre>
 
-In another window execute (dig](http://linux.die.net/man/1/dig):
+In another window execute [dig](http://linux.die.net/man/1/dig):
 <pre>
 $ dig @127.0.0.1 -p 9000 foo.bar.com 
 
@@ -38,7 +38,7 @@ $ dig @127.0.0.1 -p 9000 foo.bar.com
 ; (1 server found)
 ;; global options: +cmd
 ;; Got answer:
-;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 15287
+;; -&gt;&gt;HEADER&lt;&lt;- opcode: QUERY, status: NOERROR, id: 15287
 ;; flags: qr; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 0
 
 ;; QUESTION SECTION:
