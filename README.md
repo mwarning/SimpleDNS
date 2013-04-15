@@ -50,3 +50,9 @@ foo.bar.com.            0       IN      A       192.168.1.1
 ;; WHEN: Mon Apr 15 00:50:38 2013
 ;; MSG SIZE  rcvd: 56
 </pre>
+
+### Recommended Reading
+
+The DNS section of the [TCP/IP-Guide](http://www.tcpipguide.com) was very helpful
+for understanding the protocol.
+
