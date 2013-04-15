@@ -302,7 +302,7 @@ void print_resource_record(struct ResourceRecord* rr)
 				printf("AAAA Resource Record { address ");
 			
 				for(i = 0; i < 16; ++i)
-					printf("%s%u", (i ? "." : ""), rd->aaaa_record.addr[i]);
+					printf("%s%02x", (i ? ":" : ""), rd->aaaa_record.addr[i]);
 			
 				printf(" }");
 				break;
