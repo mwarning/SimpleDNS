@@ -53,7 +53,7 @@ enum {
 enum {
 	A_Resource_RecordType = 1,
 	NS_Resource_RecordType = 2,
-	CN_Resource_RecordType = 5,
+	CNAME_Resource_RecordType = 5,
 	SOA_Resource_RecordType = 6,
 	PTR_Resource_RecordType = 12,
 	MX_Resource_RecordType = 15,
@@ -250,7 +250,7 @@ void print_resource_record(struct ResourceRecord* rr)
 				rr->rd_length
 		);
 
-		union ResourceData *rd = &rr->rd_data;;
+		union ResourceData *rd = &rr->rd_data;
 		switch(rr->type)
 		{
 			case A_Resource_RecordType:
@@ -266,7 +266,7 @@ void print_resource_record(struct ResourceRecord* rr)
 					rd->name_server_record.name
 				);
 				break;
-			case CN_Resource_RecordType:
+			case CNAME_Resource_RecordType:
 				printf("Canonical Name Resource Record { name %u}",
 					rd->cname_record.name
 				);
@@ -536,12 +536,9 @@ void resolver_process(struct Message* msg)
 	int rc;
 
 	// leave most values intact for response
-	msg->qr = 1; // Query/Response Flag (0 = query, 1 = response)
-	//msg->opcode; // Operation Code
-	//msg->aa; // Authoritative Answer Flag (0 = non-authoritative., 1 = authoritative)
-	//msg->tc; // Truncation Flag
-	//msg->rd; // Recursion Desired
-	//msg->ra  // Recursion Available
+	msg->qr = 1; // this is a response
+	msg->aa = 1; // this server is authoritative
+	msg->ra = 0; // no recursion available
 	msg->rcode = Ok_ResponseType;
 
 	//should already be 0
@@ -582,7 +579,7 @@ void resolver_process(struct Message* msg)
 				break;
 			/*
 			case NS_Resource_RecordType:
-			case CN_Resource_RecordType:
+			case CNAME_Resource_RecordType:
 			case SOA_Resource_RecordType:
 			case PTR_Resource_RecordType:
 			case MX_Resource_RecordType:
