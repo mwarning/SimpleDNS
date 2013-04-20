@@ -58,7 +58,7 @@ enum {
 	PTR_Resource_RecordType = 12,
 	MX_Resource_RecordType = 15,
 	TXT_Resource_RecordType = 16,
-	AAAA_Resource_RecordType = 26
+	AAAA_Resource_RecordType = 28
 };
 
 // Operation Code
@@ -573,7 +573,7 @@ void resolver_process(struct Message* msg)
 				break;
 			case AAAA_Resource_RecordType:
 				rr->rd_length = 16;
-				rc = get_AAAA_Record(rr->rd_data.a_record.addr, q->qName);
+				rc = get_AAAA_Record(rr->rd_data.aaaa_record.addr, q->qName);
 				if(rc < 0)
 					goto next;
 				break;
