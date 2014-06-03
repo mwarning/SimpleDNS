@@ -463,14 +463,13 @@ void decode_header(struct Message* msg, const uchar** buffer)
 	msg->id = get16bits(buffer);
 
 	uint fields = get16bits(buffer);
-	msg->qr = fields & QR_MASK;
-	msg->opcode = fields & OPCODE_MASK;
-	msg->aa = fields & AA_MASK;
-	msg->tc = fields & TC_MASK;
-	msg->rd = fields & RD_MASK;
-	msg->ra = fields & RA_MASK;
-	msg->rcode = fields & RCODE_MASK;
-
+	msg->qr = (fields & QR_MASK) >> 15;
+	msg->opcode = (fields & OPCODE_MASK) >> 11;
+	msg->aa = (fields & AA_MASK) >> 10;
+	msg->tc = (fields & TC_MASK) >> 9;
+	msg->rd = (fields & RD_MASK) >> 8;
+	msg->ra = (fields & RA_MASK) >> 7;
+	msg->rcode = (fields & RCODE_MASK) >> 0;
 
 	msg->qdCount = get16bits(buffer);
 	msg->anCount = get16bits(buffer);
@@ -482,10 +481,10 @@ void code_header(struct Message* msg, uchar** buffer)
 {
 	put16bits(buffer, msg->id);
 
-	int fields = (msg->qr << 15);
-	fields += (msg->opcode << 14);
-	// TODO: insert the rest of the field 
-	fields += msg->rcode;
+	int fields = 0;
+	fields |= (msg->qr << 15) & QR_MASK;
+	fields |= (msg->rcode << 0) & RCODE_MASK;
+	// TODO: insert the rest of the field
 	put16bits(buffer, fields);
 
 	put16bits(buffer, msg->qdCount);
