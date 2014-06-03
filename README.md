@@ -53,6 +53,6 @@ foo.bar.com.            0       IN      A       192.168.1.1
 
 ### Recommended Reading
 
-The DNS section of the [TCP/IP-Guide](http://www.tcpipguide.com) was very helpful
+The DNS section of the [TCP/IP-Guide](http://www.tcpipguide.com/free/t_TCPIPDomainNameSystemDNS.htm) was very helpful
 for understanding the protocol.
 
