@@ -39,7 +39,7 @@ static const uint RD_MASK = 0x0100;
 static const uint RA_MASK = 0x8000;
 static const uint RCODE_MASK = 0x000F;
 
-// Response Type
+/* Response Type */
 enum {
 	Ok_ResponseType = 0,
 	FormatError_ResponseType = 1,
@@ -49,7 +49,7 @@ enum {
 	Refused_ResponseType = 5
 };
 
-// Resource Record Types
+/* Resource Record Types */
 enum {
 	A_Resource_RecordType = 1,
 	NS_Resource_RecordType = 2,
@@ -58,19 +58,20 @@ enum {
 	PTR_Resource_RecordType = 12,
 	MX_Resource_RecordType = 15,
 	TXT_Resource_RecordType = 16,
-	AAAA_Resource_RecordType = 28
+	AAAA_Resource_RecordType = 28,
+	SRV_Resource_RecordType = 33
 };
 
-// Operation Code
+/* Operation Code */
 enum {
-	QUERY_OperationCode = 0, // standard query
-	IQUERY_OperationCode = 1, // inverse query
-	STATUS_OperationCode = 2, // server status request
-	NOTIFY_OperationCode = 4, // request zone transfer
-	UPDATE_OperationCode = 5, // change resource records
+	QUERY_OperationCode = 0, /* standard query */
+	IQUERY_OperationCode = 1, /* inverse query */
+	STATUS_OperationCode = 2, /* server status request */
+	NOTIFY_OperationCode = 4, /* request zone transfer */
+	UPDATE_OperationCode = 5 /* change resource records */
 };
 
-// Response Code
+/* Response Code */
 enum {
 	NoError_ResponseCode = 0,
 	FormatError_ResponseCode = 1,
@@ -78,7 +79,7 @@ enum {
 	NameError_ResponseCode = 3
 };
 
-// Query Type
+/* Query Type */
 enum {
 	IXFR_QueryType = 251,
 	AXFR_QueryType = 252,
@@ -88,98 +89,100 @@ enum {
 };
 
 /*
-* Custom allocator.
-*/
-
-// We use a global block allocator
-// for ever heap allocation to simplify
-// memory handling.
-char* gbuffer = 0;
-size_t gbuffer_max_size = 0;
-size_t gbuffer_curr_size = 0;
-
-
-void* gmalloc(size_t size)
-{
-	if(gbuffer_curr_size + size >= gbuffer_max_size)
-		return NULL;
-	
-	size_t cur = gbuffer_curr_size;
-	gbuffer_curr_size += size;
-	return gbuffer + cur;
-}
-
-/*
 * Types.
 */
 
-// QuestionSection
-struct Question
-{
-	uchar* qName;
-	uint qType;
-	uint qClass;
+/* Question Section */
+struct Question {
+	char *qName;
+	ushort qType;
+	ushort qClass;
 	struct Question* next; // for linked list
 };
 
-union ResourceData
-{
-	struct { char* txt_data; } txt_record;
-	struct { uchar addr[4]; } a_record;
-	struct { char* name; } name_server_record;
-	struct { char* name; } cname_record;
-	struct { char* name; } ptr_record;
-	struct { uint preference; char* exchange; } mx_record;
-	struct { char* MName; char* RName;
-		uint serial; uint refresh; uint retry;
-		uint expire; uint minimum; } soa_record;
-	struct { uchar addr[16]; } aaaa_record;
+/* Data part of a Resource Record */
+union ResourceData {
+	struct {
+		char *txt_data;
+	} txt_record;
+	struct {
+		uchar addr[4];
+	} a_record;
+	struct {
+		char* MName;
+		char* RName;
+		uint serial;
+		uint refresh;
+		uint retry;
+		uint expire;
+		uint minimum;
+	} soa_record;
+	struct {
+		char *name;
+	} name_server_record;
+	struct {
+		char name;
+	} cname_record;
+	struct {
+		char *name;
+	} ptr_record;
+	struct {
+		ushort preference;
+		char *exchange;
+	} mx_record;
+	struct {
+		uchar addr[16];
+	} aaaa_record;
+	struct {
+		ushort priority;
+		ushort weight;
+		ushort port;
+		char *target;
+	} srv_record;
 };
 
-// DNS Message Resource Record Field Formats 
-struct ResourceRecord
-{
-	char* name;
-	uint type;
-	uint class;
-	uint ttl;
-	uint rd_length;
+/* Resource Record Section */
+struct ResourceRecord {
+	char *name;
+	ushort type;
+	ushort class;
+	ushort ttl;
+	ushort rd_length;
 	union ResourceData rd_data;
-
 	struct ResourceRecord* next; // for linked list
 };
 
-struct Message
-{
-	uint id; // Identifier
+struct Message {
+	ushort id; /* Identifier */
 
-	//flags
-	uint qr; // Query/Response Flag (0 = query, 1 = response)
-	uint opcode; // Operation Code
-	uint aa; // Authoritative Answer Flag (0 = non-authoritative, 1 = authoritative)
-	uint tc; // Truncation Flag
-	uint rd; // Recursion Desired
-	uint ra; // Recursion Available
-	uint rcode; // Response Code
+	/* Flags */
+	ushort qr; /* Query/Response Flag */
+	ushort opcode; /* Operation Code */
+	ushort aa; /* Authoritative Answer Flag */
+	ushort tc; /* Truncation Flag */
+	ushort rd; /* Recursion Desired */
+	ushort ra; /* Recursion Available */
+	ushort rcode; /* Response Code */
 
-	uint qdCount; // Question Count
-	uint anCount; // Answer Record Count:
-	uint nsCount; // Authority Record Count
-	uint arCount; // Additional Record Count
+	ushort qdCount; /* Question Count */
+	ushort anCount; /* Answer Record Count */
+	ushort nsCount; /* Authority Record Count */
+	ushort arCount; /* Additional Record Count */
 
-	// at least one question; questions are copied to response 1:1
+	/* At least one question; questions are copied to the response 1:1 */
 	struct Question* questions;
 
-	// resource records to be send back
-	// Every resource record can be in any of the following places.
-	// But every place has a different semantic.
+	/*
+	* Resource records to be send back.
+	* Every resource record can be in any of the following places.
+	* But every place has a different semantic.
+	*/
 	struct ResourceRecord* answers;
 	struct ResourceRecord* authorities;
 	struct ResourceRecord* additionals;
 };
 
-
-int get_A_Record(uchar addr[4], char* domain_name)
+int get_A_Record(uchar addr[4], const char domain_name[])
 {
 	if(strcmp("foo.bar.com", domain_name) == 0)
 	{
@@ -195,7 +198,7 @@ int get_A_Record(uchar addr[4], char* domain_name)
 	}
 }
 
-int get_AAAA_Record(uchar addr[16], char* domain_name)
+int get_AAAA_Record(uchar addr[16], const char domain_name[])
 {
 	if(strcmp("foo.bar.com", domain_name) == 0)
 	{
@@ -346,35 +349,32 @@ void print_query(struct Message* msg)
 * Basic memory operations.
 */
 
-int get16bits(const uchar** buffer)
+size_t get16bits(const uchar** buffer)
 {
-	int value = (*buffer)[0];
-	value = value << 8;
-	value += (*buffer)[1];
-	(*buffer) += 2;
+	ushort value;
+
+	value = ntohs( *((typeof(value)*) *buffer) );
+	*buffer += 2;
+
 	return value;
 }
 
 void put8bits(uchar** buffer, uchar value)
 {
-	(*buffer)[0] = value;
-	(*buffer) += 1;
+	*((typeof(value)*) *buffer) = value;
+	*buffer += 1;
 }
 
-void put16bits(uchar** buffer, uint value)
+void put16bits(uchar** buffer, ushort value)
 {
-	(*buffer)[0] = (value & 0xFF00) >> 8;
-	(*buffer)[1] = value & 0xFF;
-	(*buffer) += 2;
+	*((typeof(value)*) *buffer) = htons( value );
+	*buffer += 2;
 }
 
-void put32bits(uchar** buffer, ulong value)
+void put32bits(uchar** buffer, unsigned long long value)
 {
-	(*buffer)[0] = (value & 0xFF000000) >> 24;
-	(*buffer)[1] = (value & 0xFF0000) >> 16;
-	(*buffer)[2] = (value & 0xFF00) >> 16;
-	(*buffer)[3] = (value & 0xFF) >> 16;
-	(*buffer) += 4;
+	*((typeof(value)*) *buffer) = htonl( value );
+	*buffer += 4;
 }
 
 /*
@@ -411,20 +411,11 @@ char* decode_domain_name(const uchar** buffer)
 
 	*buffer += i + 1; //also jump over the last 0
 
-	char* dup = (char*) gmalloc(j+1);
-	if(dup)
-	{
-		memcpy(dup, name, j+1);
-		return dup;
-	}
-	else
-	{
-		return NULL;
-	}
+	return strdup(name);
 }
 
 // foo.bar.com => 3foo3bar3com0
-void code_domain_name(uchar** buffer, const uchar* domain)
+void encode_domain_name(uchar** buffer, const uchar* domain)
 {
 	uchar* buf = *buffer;
 	const uchar* beg = domain;
@@ -477,14 +468,14 @@ void decode_header(struct Message* msg, const uchar** buffer)
 	msg->arCount = get16bits(buffer);
 }
 
-void code_header(struct Message* msg, uchar** buffer)
+void encode_header(struct Message* msg, uchar** buffer)
 {
 	put16bits(buffer, msg->id);
 
 	int fields = 0;
 	fields |= (msg->qr << 15) & QR_MASK;
 	fields |= (msg->rcode << 0) & RCODE_MASK;
-	// TODO: insert the rest of the field
+	// TODO: insert the rest of the fields
 	put16bits(buffer, fields);
 
 	put16bits(buffer, msg->qdCount);
@@ -493,8 +484,9 @@ void code_header(struct Message* msg, uchar** buffer)
 	put16bits(buffer, msg->arCount);
 }
 
-int decode_query(struct Message* msg, const uchar* buffer, int size)
+int decode_msg(struct Message* msg, const uchar* buffer, int size)
 {
+	char name[300];
 	int i;
 
 	decode_header(msg, &buffer);
@@ -504,20 +496,18 @@ int decode_query(struct Message* msg, const uchar* buffer, int size)
 		printf("Only questions expected!\n");
 		return -1;
 	}
-	
+
 	// parse questions
 	uint qcount = msg->qdCount;
 	struct Question* qs = msg->questions;
 	for(i = 0; i < qcount; ++i)
 	{
-		struct Question* q = gmalloc(sizeof(struct Question));
-		if(q == NULL)
-			return -1;
-		
+		struct Question* q = malloc(sizeof(struct Question));
+
 		q->qName = decode_domain_name(&buffer);
 		q->qType = get16bits(&buffer);
 		q->qClass = get16bits(&buffer);
-		
+
 		//prepend question to questions list
 		q->next = qs; 
 		msg->questions = q;
@@ -532,6 +522,9 @@ int decode_query(struct Message* msg, const uchar* buffer, int size)
 // in either section 'answers', 'authorities' or 'additionals'.
 void resolver_process(struct Message* msg)
 {
+	struct ResourceRecord* beg;
+	struct ResourceRecord* rr;
+	struct Question* q;
 	int rc;
 
 	// leave most values intact for response
@@ -546,12 +539,12 @@ void resolver_process(struct Message* msg)
 	msg->arCount = 0;
 
 	//for every question append resource records
-	struct Question* q = msg->questions;
+	q = msg->questions;
 	while(q)
 	{
-		struct ResourceRecord* rr = gmalloc(sizeof(struct ResourceRecord));
+		rr = malloc(sizeof(struct ResourceRecord));
 
-		rr->name = q->qName;
+		rr->name = strdup(q->qName);
 		rr->type = q->qType;
 		rr->class = q->qClass;
 		rr->ttl = 60*60; //in seconds; 0 means no caching
@@ -593,9 +586,9 @@ void resolver_process(struct Message* msg)
 		msg->anCount++;
 
 		// prepend resource record to answers list
-		struct ResourceRecord* a = msg->answers;
+		beg = msg->answers;
 		msg->answers = rr;
-		rr->next = a;
+		rr->next = beg;
 
 		//jump here to omit question
 		next:
@@ -605,14 +598,13 @@ void resolver_process(struct Message* msg)
 	}
 }
 
-
-int code_resource_records(struct ResourceRecord* rr, uchar** buffer) 
+int encode_resource_records(struct ResourceRecord* rr, uchar** buffer) 
 {
 	int i;
 	while(rr)
 	{
 		// Answer questions by attaching resource sections.
-		code_domain_name(buffer, rr->name);
+		encode_domain_name(buffer, rr->name);
 		put16bits(buffer, rr->type);
 		put16bits(buffer, rr->class);
 		put32bits(buffer, rr->ttl);
@@ -630,58 +622,73 @@ int code_resource_records(struct ResourceRecord* rr, uchar** buffer)
 				break;
 			default:
 				fprintf(stderr, "Unknown type %u. => Ignore resource record.\n", rr->type);
+			return 1;
 		}
 		
 		rr = rr->next;
 	}
+	return 0;
 }
 
-int code_response(struct Message* msg, uchar* buffer) 
+int encode_msg(struct Message* msg, uchar** buffer)
 {
-	const uchar* buf = buffer;
+	struct Question* q;
+	int rc;
 
-	code_header(msg, &buffer);
+	encode_header(msg, buffer);
 
-	struct Question* q = msg->questions;
+	q = msg->questions;
 	while(q)
 	{
-		code_domain_name(&buffer, q->qName);
-		put16bits(&buffer, q->qType);
-		put16bits(&buffer, q->qClass);
+		encode_domain_name(buffer, q->qName);
+		put16bits(buffer, q->qType);
+		put16bits(buffer, q->qClass);
 
 		q = q->next;
 	}
-	
-	code_resource_records(msg->answers, &buffer);
-	code_resource_records(msg->authorities, &buffer);
-	code_resource_records(msg->additionals, &buffer);
 
-	return buffer - buf;
+	rc = 0;
+	rc |= encode_resource_records(msg->answers, buffer);
+	rc |= encode_resource_records(msg->authorities, buffer);
+	rc |= encode_resource_records(msg->additionals, buffer);
+
+	return rc;
 }
 
-// Initialize a global buffer to simplify memory handling.
-// No complex freeing needed. :-)
-void init_gbuffer(size_t size)
+void free_resource_records(struct ResourceRecord* rr)
 {
-	gbuffer = malloc(size);
-	gbuffer_max_size = size;
-	gbuffer_curr_size = 0;
+	struct ResourceRecord* next;
+
+	while(rr) {
+		free(rr->name);
+		next = rr->next;
+		free(rr);
+		rr = next;
+	}
+}
+
+void free_questions(struct Question* qq)
+{
+	struct Question* next;
+
+	while(qq) {
+		free(qq->qName);
+		next = qq->next;
+		free(qq);
+		qq = next;
+	}
 }
 
 int main()
 {
 	// buffer for input/output binary packet
-	char buffer[BUF_SIZE];
+	uchar buffer[BUF_SIZE];
 	struct sockaddr_in client_addr;
 	socklen_t addr_len = sizeof(struct sockaddr_in);
 	struct sockaddr_in addr;
+	int nbytes, rc, buflen;
 	int sock;
 	int port = 9000;
-
-	// buffer for response/request structures
-	gbuffer = malloc(2 * BUF_SIZE);
-	gbuffer_max_size = (2 * BUF_SIZE);
-	gbuffer_curr_size = 0;
 
 	struct Message msg;
 
@@ -691,7 +698,7 @@ int main()
 
 	sock = socket(AF_INET, SOCK_DGRAM, 0);
 
-	int rc = bind(sock, (struct sockaddr*) &addr, addr_len);
+	rc = bind(sock, (struct sockaddr*) &addr, addr_len);
 
 	if(rc != 0)
 	{
@@ -703,29 +710,34 @@ int main()
 
 	while(1)
 	{
-		gbuffer_curr_size = 0;
-
 		memset(&msg, 0, sizeof(struct Message));
 
-		int nbytes = recvfrom(sock, buffer, sizeof(buffer), 0,
+		free_questions(msg.questions);
+		free_resource_records(msg.answers);
+		free_resource_records(msg.authorities);
+		free_resource_records(msg.additionals);
+
+		nbytes = recvfrom(sock, buffer, sizeof(buffer), 0,
 			(struct sockaddr *) &client_addr, &addr_len);
 
-		nbytes = decode_query(&msg, buffer, nbytes);
-		if(nbytes < 0)
+		if(decode_msg(&msg, buffer, nbytes) != 0) {
 			continue;
-	
-		// print query
+		}
+
+		/* Print query */
 		print_query(&msg);
 
 		resolver_process(&msg);
 
-		// print response
+		/* Print response */
 		print_query(&msg);
 
-		nbytes = code_response(&msg, buffer);
-		if(nbytes < 0)
+		uchar *p = buffer;
+		if(encode_msg(&msg, &p) != 0) {
 			continue;
+		}
 
-		sendto(sock, buffer, nbytes, 0, (struct sockaddr*) &client_addr, addr_len);
+		int buflen = p - buffer;
+		sendto(sock, buffer, buflen, 0, (struct sockaddr*) &client_addr, addr_len);
 	}
 }
