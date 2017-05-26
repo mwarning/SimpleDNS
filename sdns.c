@@ -491,7 +491,7 @@ int decode_msg(struct Message* msg, const uchar* buffer, int size)
 
 	decode_header(msg, &buffer);
 
-	if((msg->anCount+msg->nsCount+msg->arCount) != 0)
+	if((msg->anCount + msg->nsCount) != 0)
 	{
 		printf("Only questions expected!\n");
 		return -1;
