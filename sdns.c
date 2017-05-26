@@ -7,6 +7,7 @@
 #include <string.h>
 #include <malloc.h>
 #include <errno.h>
+#include <stdint.h>
 
 #define BUF_SIZE 1500
 
@@ -22,22 +23,17 @@
 */
 
 
-typedef unsigned char uchar;
-typedef unsigned short ushort;
-typedef unsigned int uint;
-typedef unsigned long ulong;
-
 /*
 * Masks and constants.
 */
 
-static const uint QR_MASK = 0x8000;
-static const uint OPCODE_MASK = 0x7800;
-static const uint AA_MASK = 0x0400;
-static const uint TC_MASK = 0x0200;
-static const uint RD_MASK = 0x0100;
-static const uint RA_MASK = 0x8000;
-static const uint RCODE_MASK = 0x000F;
+static const uint32_t QR_MASK = 0x8000;
+static const uint32_t OPCODE_MASK = 0x7800;
+static const uint32_t AA_MASK = 0x0400;
+static const uint32_t TC_MASK = 0x0200;
+static const uint32_t RD_MASK = 0x0100;
+static const uint32_t RA_MASK = 0x8000;
+static const uint32_t RCODE_MASK = 0x000F;
 
 /* Response Type */
 enum {
@@ -95,8 +91,8 @@ enum {
 /* Question Section */
 struct Question {
 	char *qName;
-	ushort qType;
-	ushort qClass;
+	uint16_t qType;
+	uint16_t qClass;
 	struct Question* next; // for linked list
 };
 
@@ -106,16 +102,16 @@ union ResourceData {
 		char *txt_data;
 	} txt_record;
 	struct {
-		uchar addr[4];
+		uint8_t addr[4];
 	} a_record;
 	struct {
 		char* MName;
 		char* RName;
-		uint serial;
-		uint refresh;
-		uint retry;
-		uint expire;
-		uint minimum;
+		uint32_t serial;
+		uint32_t refresh;
+		uint32_t retry;
+		uint32_t expire;
+		uint32_t minimum;
 	} soa_record;
 	struct {
 		char *name;
@@ -127,16 +123,16 @@ union ResourceData {
 		char *name;
 	} ptr_record;
 	struct {
-		ushort preference;
+		uint16_t preference;
 		char *exchange;
 	} mx_record;
 	struct {
-		uchar addr[16];
+		uint8_t addr[16];
 	} aaaa_record;
 	struct {
-		ushort priority;
-		ushort weight;
-		ushort port;
+		uint16_t priority;
+		uint16_t weight;
+		uint16_t port;
 		char *target;
 	} srv_record;
 };
@@ -144,30 +140,30 @@ union ResourceData {
 /* Resource Record Section */
 struct ResourceRecord {
 	char *name;
-	ushort type;
-	ushort class;
-	ushort ttl;
-	ushort rd_length;
+	uint16_t type;
+	uint16_t class;
+	uint16_t ttl;
+	uint16_t rd_length;
 	union ResourceData rd_data;
 	struct ResourceRecord* next; // for linked list
 };
 
 struct Message {
-	ushort id; /* Identifier */
+	uint16_t id; /* Identifier */
 
 	/* Flags */
-	ushort qr; /* Query/Response Flag */
-	ushort opcode; /* Operation Code */
-	ushort aa; /* Authoritative Answer Flag */
-	ushort tc; /* Truncation Flag */
-	ushort rd; /* Recursion Desired */
-	ushort ra; /* Recursion Available */
-	ushort rcode; /* Response Code */
+	uint16_t qr; /* Query/Response Flag */
+	uint16_t opcode; /* Operation Code */
+	uint16_t aa; /* Authoritative Answer Flag */
+	uint16_t tc; /* Truncation Flag */
+	uint16_t rd; /* Recursion Desired */
+	uint16_t ra; /* Recursion Available */
+	uint16_t rcode; /* Response Code */
 
-	ushort qdCount; /* Question Count */
-	ushort anCount; /* Answer Record Count */
-	ushort nsCount; /* Authority Record Count */
-	ushort arCount; /* Additional Record Count */
+	uint16_t qdCount; /* Question Count */
+	uint16_t anCount; /* Answer Record Count */
+	uint16_t nsCount; /* Authority Record Count */
+	uint16_t arCount; /* Additional Record Count */
 
 	/* At least one question; questions are copied to the response 1:1 */
 	struct Question* questions;
@@ -182,7 +178,7 @@ struct Message {
 	struct ResourceRecord* additionals;
 };
 
-int get_A_Record(uchar addr[4], const char domain_name[])
+int get_A_Record(uint8_t addr[4], const char domain_name[])
 {
 	if(strcmp("foo.bar.com", domain_name) == 0)
 	{
@@ -198,7 +194,7 @@ int get_A_Record(uchar addr[4], const char domain_name[])
 	}
 }
 
-int get_AAAA_Record(uchar addr[16], const char domain_name[])
+int get_AAAA_Record(uint8_t addr[16], const char domain_name[])
 {
 	if(strcmp("foo.bar.com", domain_name) == 0)
 	{
@@ -231,7 +227,7 @@ int get_AAAA_Record(uchar addr[16], const char domain_name[])
 * Debugging functions.
 */
 
-void print_hex(uchar* buf, size_t len)
+void print_hex(uint8_t* buf, size_t len)
 {
 	int i;
 	printf("%u bytes:\n", len);
@@ -349,9 +345,9 @@ void print_query(struct Message* msg)
 * Basic memory operations.
 */
 
-size_t get16bits(const uchar** buffer)
+size_t get16bits(const uint8_t** buffer)
 {
-	ushort value;
+	uint16_t value;
 
 	value = ntohs( *((typeof(value)*) *buffer) );
 	*buffer += 2;
@@ -359,19 +355,19 @@ size_t get16bits(const uchar** buffer)
 	return value;
 }
 
-void put8bits(uchar** buffer, uchar value)
+void put8bits(uint8_t** buffer, uint8_t value)
 {
 	*((typeof(value)*) *buffer) = value;
 	*buffer += 1;
 }
 
-void put16bits(uchar** buffer, ushort value)
+void put16bits(uint8_t** buffer, uint16_t value)
 {
 	*((typeof(value)*) *buffer) = htons( value );
 	*buffer += 2;
 }
 
-void put32bits(uchar** buffer, unsigned long long value)
+void put32bits(uint8_t** buffer, unsigned long long value)
 {
 	*((typeof(value)*) *buffer) = htonl( value );
 	*buffer += 4;
@@ -382,10 +378,10 @@ void put32bits(uchar** buffer, unsigned long long value)
 */
 
 // 3foo3bar3com0 => foo.bar.com
-char* decode_domain_name(const uchar** buffer)
+char* decode_domain_name(const uint8_t** buffer)
 {
-	uchar name[256];
-	const uchar* buf = *buffer;
+	uint8_t name[256];
+	const uint8_t* buf = *buffer;
 	int j = 0;
 	int i = 0;
 	while(buf[i] != 0)
@@ -415,11 +411,11 @@ char* decode_domain_name(const uchar** buffer)
 }
 
 // foo.bar.com => 3foo3bar3com0
-void encode_domain_name(uchar** buffer, const uchar* domain)
+void encode_domain_name(uint8_t** buffer, const uint8_t* domain)
 {
-	uchar* buf = *buffer;
-	const uchar* beg = domain;
-	const uchar* pos;
+	uint8_t* buf = *buffer;
+	const uint8_t* beg = domain;
+	const uint8_t* pos;
 	int len = 0;
 	int i = 0;
 
@@ -449,11 +445,11 @@ void encode_domain_name(uchar** buffer, const uchar* domain)
 }
 
 
-void decode_header(struct Message* msg, const uchar** buffer)
+void decode_header(struct Message* msg, const uint8_t** buffer)
 {
 	msg->id = get16bits(buffer);
 
-	uint fields = get16bits(buffer);
+	uint32_t fields = get16bits(buffer);
 	msg->qr = (fields & QR_MASK) >> 15;
 	msg->opcode = (fields & OPCODE_MASK) >> 11;
 	msg->aa = (fields & AA_MASK) >> 10;
@@ -468,7 +464,7 @@ void decode_header(struct Message* msg, const uchar** buffer)
 	msg->arCount = get16bits(buffer);
 }
 
-void encode_header(struct Message* msg, uchar** buffer)
+void encode_header(struct Message* msg, uint8_t** buffer)
 {
 	put16bits(buffer, msg->id);
 
@@ -484,7 +480,7 @@ void encode_header(struct Message* msg, uchar** buffer)
 	put16bits(buffer, msg->arCount);
 }
 
-int decode_msg(struct Message* msg, const uchar* buffer, int size)
+int decode_msg(struct Message* msg, const uint8_t* buffer, int size)
 {
 	char name[300];
 	int i;
@@ -498,7 +494,7 @@ int decode_msg(struct Message* msg, const uchar* buffer, int size)
 	}
 
 	// parse questions
-	uint qcount = msg->qdCount;
+	uint32_t qcount = msg->qdCount;
 	struct Question* qs = msg->questions;
 	for(i = 0; i < qcount; ++i)
 	{
@@ -598,7 +594,7 @@ void resolver_process(struct Message* msg)
 	}
 }
 
-int encode_resource_records(struct ResourceRecord* rr, uchar** buffer) 
+int encode_resource_records(struct ResourceRecord* rr, uint8_t** buffer)
 {
 	int i;
 	while(rr)
@@ -630,7 +626,7 @@ int encode_resource_records(struct ResourceRecord* rr, uchar** buffer)
 	return 0;
 }
 
-int encode_msg(struct Message* msg, uchar** buffer)
+int encode_msg(struct Message* msg, uint8_t** buffer)
 {
 	struct Question* q;
 	int rc;
@@ -682,7 +678,7 @@ void free_questions(struct Question* qq)
 int main()
 {
 	// buffer for input/output binary packet
-	uchar buffer[BUF_SIZE];
+	uint8_t buffer[BUF_SIZE];
 	struct sockaddr_in client_addr;
 	socklen_t addr_len = sizeof(struct sockaddr_in);
 	struct sockaddr_in addr;
@@ -732,7 +728,7 @@ int main()
 		/* Print response */
 		print_query(&msg);
 
-		uchar *p = buffer;
+		uint8_t *p = buffer;
 		if(encode_msg(&msg, &p) != 0) {
 			continue;
 		}
