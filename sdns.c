@@ -13,7 +13,7 @@
 #define BUF_SIZE 1500
 
 /*
-* This software is licensed under the Public Domain.
+* This software is licensed under the CC0.
 *
 * This is a _basic_ DNS Server for educational use.
 *  It doesn't prevent invalid packets from crashing
