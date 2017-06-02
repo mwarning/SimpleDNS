@@ -7,6 +7,7 @@
 #include <string.h>
 #include <malloc.h>
 #include <errno.h>
+#include <string.h>
 #include <stdint.h>
 
 #define BUF_SIZE 1500
@@ -349,7 +350,7 @@ size_t get16bits(const uint8_t** buffer)
 {
 	uint16_t value;
 
-	value = ntohs( *((typeof(value)*) *buffer) );
+	value = ntohs( *((uint16_t*) *buffer) );
 	*buffer += 2;
 
 	return value;
@@ -357,19 +358,19 @@ size_t get16bits(const uint8_t** buffer)
 
 void put8bits(uint8_t** buffer, uint8_t value)
 {
-	*((typeof(value)*) *buffer) = value;
+	*((uint8_t*) *buffer) = value;
 	*buffer += 1;
 }
 
 void put16bits(uint8_t** buffer, uint16_t value)
 {
-	*((typeof(value)*) *buffer) = htons( value );
+	*((uint16_t*) *buffer) = htons( value );
 	*buffer += 2;
 }
 
-void put32bits(uint8_t** buffer, unsigned long long value)
+void put32bits(uint8_t** buffer, uint64_t value)
 {
-	*((typeof(value)*) *buffer) = htonl( value );
+	*((uint64_t*) *buffer) = htonl( value );
 	*buffer += 4;
 }
 
