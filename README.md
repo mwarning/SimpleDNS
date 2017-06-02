@@ -29,7 +29,7 @@ Listening on port 9000.
 </pre>
 
 In another window execute [dig](http://linux.die.net/man/1/dig).
-dig is part of the dnsutils package on Debian.
+On Debian, dig is part of the dnsutils package.
 
 <pre>
 $ dig @127.0.0.1 -p 9000 foo.bar.com 
