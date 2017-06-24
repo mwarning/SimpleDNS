@@ -346,33 +346,32 @@ void print_query(struct Message* msg)
 * Basic memory operations.
 */
 
-size_t get16bits(const uint8_t** buffer)
-{
+size_t get16bits( const uint8_t** buffer ) {
 	uint16_t value;
 
-	value = ntohs( *((uint16_t*) *buffer) );
+	memcpy( &value, *buffer, 2 );
 	*buffer += 2;
 
-	return value;
+	return ntohs( value );
 }
 
-void put8bits(uint8_t** buffer, uint8_t value)
-{
-	*((uint8_t*) *buffer) = value;
+void put8bits( uint8_t** buffer, uint8_t value ) {
+	memcpy( *buffer, &value, 1 );
 	*buffer += 1;
 }
 
-void put16bits(uint8_t** buffer, uint16_t value)
-{
-	*((uint16_t*) *buffer) = htons( value );
+void put16bits( uint8_t** buffer, uint16_t value ) {
+	value = htons( value );
+	memcpy( *buffer, &value, 2 );
 	*buffer += 2;
 }
 
-void put32bits(uint8_t** buffer, uint64_t value)
-{
-	*((uint64_t*) *buffer) = htonl( value );
+void put32bits( uint8_t** buffer, uint32_t value ) {
+	value = htons( value );
+	memcpy( *buffer, &value, 4 );
 	*buffer += 4;
 }
+
 
 /*
 * Deconding/Encoding functions.
