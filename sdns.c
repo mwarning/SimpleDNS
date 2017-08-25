@@ -262,7 +262,7 @@ void print_resource_record(struct ResourceRecord* rr)
 				printf(" }");
 				break;
 			case NS_Resource_RecordType:
-				printf("Name Server Resource Record { name %u}",
+				printf("Name Server Resource Record { name %s}",
 					rd->name_server_record.name
 				);
 				break;
