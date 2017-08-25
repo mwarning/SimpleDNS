@@ -482,7 +482,6 @@ void encode_header(struct Message* msg, uint8_t** buffer)
 
 int decode_msg(struct Message* msg, const uint8_t* buffer, int size)
 {
-	char name[300];
 	int i;
 
 	decode_header(msg, &buffer);
@@ -682,7 +681,7 @@ int main()
 	struct sockaddr_in client_addr;
 	socklen_t addr_len = sizeof(struct sockaddr_in);
 	struct sockaddr_in addr;
-	int nbytes, rc, buflen;
+	int nbytes, rc;
 	int sock;
 	int port = 9000;
 
