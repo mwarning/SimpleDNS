@@ -380,7 +380,7 @@ void put32bits( uint8_t** buffer, uint32_t value ) {
 // 3foo3bar3com0 => foo.bar.com
 char* decode_domain_name(const uint8_t** buffer)
 {
-	uint8_t name[256];
+	char name[256];
 	const uint8_t* buf = *buffer;
 	int j = 0;
 	int i = 0;
