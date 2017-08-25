@@ -20,7 +20,7 @@
 *  the server.
 *
 * To test start the program and issue a DNS request:
-*  dig @127.0.0.1 -p 9000 foo.bar.com 
+*  dig @127.0.0.1 -p 9000 foo.bar.com
 */
 
 
@@ -231,7 +231,7 @@ int get_AAAA_Record(uint8_t addr[16], const char domain_name[])
 void print_hex(uint8_t* buf, size_t len)
 {
 	int i;
-	printf("%u bytes:\n", len);
+	printf("%zu bytes:\n", len);
 	for(i = 0; i < len; ++i)
 		printf("%02x ", buf[i]);
 	printf("\n");
@@ -255,10 +255,10 @@ void print_resource_record(struct ResourceRecord* rr)
 		{
 			case A_Resource_RecordType:
 				printf("Address Resource Record { address ");
-			
+
 				for(i = 0; i < 4; ++i)
 					printf("%s%u", (i ? "." : ""), rd->a_record.addr[i]);
-			
+
 				printf(" }");
 				break;
 			case NS_Resource_RecordType:
@@ -300,10 +300,10 @@ void print_resource_record(struct ResourceRecord* rr)
 				break;
 			case AAAA_Resource_RecordType:
 				printf("AAAA Resource Record { address ");
-			
+
 				for(i = 0; i < 16; ++i)
 					printf("%s%02x", (i ? ":" : ""), rd->aaaa_record.addr[i]);
-			
+
 				printf(" }");
 				break;
 			default:
@@ -388,7 +388,7 @@ char* decode_domain_name(const uint8_t** buffer)
 	{
 		//if(i >= buflen || i > sizeof(name))
 		//	return NULL;
-		
+
 		if(i != 0)
 		{
 			name[j] = '.';
@@ -505,7 +505,7 @@ int decode_msg(struct Message* msg, const uint8_t* buffer, int size)
 		q->qClass = get16bits(&buffer);
 
 		//prepend question to questions list
-		q->next = qs; 
+		q->next = qs;
 		msg->questions = q;
 	}
 
@@ -544,9 +544,9 @@ void resolver_process(struct Message* msg)
 		rr->type = q->qType;
 		rr->class = q->qClass;
 		rr->ttl = 60*60; //in seconds; 0 means no caching
-		
+
 		printf("Query for '%s'\n", q->qName);
-		
+
 		// We only can only answer two question types so far
 		// and the answer (resource records) will be all put
 		// into the answers list.
@@ -588,7 +588,7 @@ void resolver_process(struct Message* msg)
 
 		//jump here to omit question
 		next:
-		
+
 		// process next question
 		q = q->next;
 	}
@@ -605,7 +605,7 @@ int encode_resource_records(struct ResourceRecord* rr, uint8_t** buffer)
 		put16bits(buffer, rr->class);
 		put32bits(buffer, rr->ttl);
 		put16bits(buffer, rr->rd_length);
-		
+
 		switch(rr->type)
 		{
 			case A_Resource_RecordType:
@@ -620,7 +620,7 @@ int encode_resource_records(struct ResourceRecord* rr, uint8_t** buffer)
 				fprintf(stderr, "Unknown type %u. => Ignore resource record.\n", rr->type);
 			return 1;
 		}
-		
+
 		rr = rr->next;
 	}
 	return 0;
