@@ -411,15 +411,15 @@ char* decode_domain_name(const uint8_t** buffer)
 }
 
 // foo.bar.com => 3foo3bar3com0
-void encode_domain_name(uint8_t** buffer, const uint8_t* domain)
+void encode_domain_name(uint8_t** buffer, const char* domain)
 {
 	uint8_t* buf = *buffer;
-	const uint8_t* beg = domain;
-	const uint8_t* pos;
+	const char* beg = domain;
+	const char* pos;
 	int len = 0;
 	int i = 0;
 
-	while(pos = strchr(beg, '.'))
+	while((pos = strchr(beg, '.')))
 	{
 		len = pos - beg;
 		buf[i] = len;
