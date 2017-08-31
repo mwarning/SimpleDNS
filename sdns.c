@@ -538,6 +538,7 @@ void resolver_process(struct Message* msg)
 	while(q)
 	{
 		rr = malloc(sizeof(struct ResourceRecord));
+		memset(rr, 0, sizeof(struct ResourceRecord));
 
 		rr->name = strdup(q->qName);
 		rr->type = q->qType;
@@ -556,13 +557,21 @@ void resolver_process(struct Message* msg)
 				rr->rd_length = 4;
 				rc = get_A_Record(rr->rd_data.a_record.addr, q->qName);
 				if(rc < 0)
+				{
+					free(rr->name);
+					free(rr);
 					goto next;
+				}
 				break;
 			case AAAA_Resource_RecordType:
 				rr->rd_length = 16;
 				rc = get_AAAA_Record(rr->rd_data.aaaa_record.addr, q->qName);
 				if(rc < 0)
+				{
+					free(rr->name);
+					free(rr);
 					goto next;
+				}
 				break;
 			/*
 			case NS_Resource_RecordType:
@@ -573,6 +582,7 @@ void resolver_process(struct Message* msg)
 			case TXT_Resource_RecordType:
 			*/
 			default:
+				free(rr);
 				msg->rcode = NotImplemented_ResponseType;
 				printf("Cannot answer question of type %d.\n", q->qType);
 				goto next;
@@ -688,6 +698,7 @@ int main()
 	int port = 9000;
 
 	struct Message msg;
+	memset(&msg, 0, sizeof(struct Message));
 
 	addr.sin_family = AF_INET;
 	addr.sin_addr.s_addr = INADDR_ANY;
@@ -707,12 +718,11 @@ int main()
 
 	while(1)
 	{
-		memset(&msg, 0, sizeof(struct Message));
-
 		free_questions(msg.questions);
 		free_resource_records(msg.answers);
 		free_resource_records(msg.authorities);
 		free_resource_records(msg.additionals);
+		memset(&msg, 0, sizeof(struct Message));
 
 		nbytes = recvfrom(sock, buffer, sizeof(buffer), 0,
 			(struct sockaddr *) &client_addr, &addr_len);
