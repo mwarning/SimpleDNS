@@ -593,6 +593,7 @@ void resolver_process(struct Message* msg)
 	}
 }
 
+/* @return 0 upon failure, 1 upon success */
 int encode_resource_records(struct ResourceRecord* rr, uint8_t** buffer)
 {
 	int i;
@@ -625,6 +626,7 @@ int encode_resource_records(struct ResourceRecord* rr, uint8_t** buffer)
 	return 0;
 }
 
+/* @return 0 upon failure, 1 upon success */
 int encode_msg(struct Message* msg, uint8_t** buffer)
 {
 	struct Question* q;
