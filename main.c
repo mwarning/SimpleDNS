@@ -214,7 +214,7 @@ int get_AAAA_Record(uint8_t addr[16], const char domain_name[])
 		addr[12] = 0x00;
 		addr[13] = 0x00;
 		addr[14] = 0x00;
-		addr[15] = 0x00;
+		addr[15] = 0x01;
 		return 0;
 	}
 	else
