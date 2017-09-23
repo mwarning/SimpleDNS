@@ -1,7 +1,7 @@
 
 ### Introduction
 
-SimpleDNS is a very simple DNS server.<br />
+SimpleDNS is a very simple DNS server.
 It was made to learn the basics of the DNS protocol.
 
 Features:
@@ -13,25 +13,23 @@ Features:
 
 ### Build
 
-<pre>
+```
 git clone https://github.com/mwarning/SimpleDNS.git
 cd SimpleDNS
-cmake .
 make
-</pre>
+```
 
 ### Test
 
 Start SimpleDNS:
-<pre>
-$./sdns
+```
+$./main
 Listening on port 9000.
-</pre>
+```
 
-In another window execute [dig](http://linux.die.net/man/1/dig).
-On Debian, dig is part of the dnsutils package.
+In another comsole window execute [dig](http://linux.die.net/man/1/dig):
 
-<pre>
+```
 $ dig @127.0.0.1 -p 9000 foo.bar.com 
 
 ; <<>> DiG 9.8.4-rpz2+rl005.12-P1 <<>> @127.0.0.1 -p 9000 foo.bar.com
@@ -51,10 +49,10 @@ foo.bar.com.            0       IN      A       192.168.1.1
 ;; SERVER: 127.0.0.1#9000(127.0.0.1)
 ;; WHEN: Mon Apr 15 00:50:38 2013
 ;; MSG SIZE  rcvd: 56
-</pre>
+```
+
+Note: On Debian Linux, dig is part of the dnsutils package.
 
 ### Recommended Reading
 
-The DNS section of the [TCP/IP-Guide](http://www.tcpipguide.com/free/t_TCPIPDomainNameSystemDNS.htm) was very helpful
-for understanding the protocol.
-
+The DNS section of the [TCP/IP-Guide](http://www.tcpipguide.com/free/t_TCPIPDomainNameSystemDNS.htm) was very helpful for understanding the protocol.
