@@ -57,7 +57,7 @@ Note:
 
 ## Modify address entries
 
-The code maps the domain "foo.bar.com" to the IPv4 adresse 192.168.1.1 and IPv6 address fe80::1.
+The code maps the domain "foo.bar.com" to the IPv4 address 192.168.1.1 and IPv6 address fe80::1.
 It is easy to find it in the code and to add other entries.
 
 ### Recommended Reading
