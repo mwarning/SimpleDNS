@@ -16,8 +16,8 @@
 * This software is licensed under the CC0.
 *
 * This is a _basic_ DNS Server for educational use.
-*  It doesn't prevent invalid packets from crashing
-*  the server.
+* It does not prevent invalid packets from crashing
+* the server.
 *
 * To test start the program and issue a DNS request:
 *  dig @127.0.0.1 -p 9000 foo.bar.com
