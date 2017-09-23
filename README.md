@@ -30,7 +30,7 @@ Listening on port 9000.
 In another comsole window execute [dig](http://linux.die.net/man/1/dig):
 
 ```
-$ dig @127.0.0.1 -p 9000 foo.bar.com 
+$ dig @127.0.0.1 -p 9000 foo.bar.com A
 
 ; <<>> DiG 9.8.4-rpz2+rl005.12-P1 <<>> @127.0.0.1 -p 9000 foo.bar.com
 ; (1 server found)
@@ -51,7 +51,14 @@ foo.bar.com.            0       IN      A       192.168.1.1
 ;; MSG SIZE  rcvd: 56
 ```
 
-Note: On Debian Linux, dig is part of the dnsutils package.
+Note:
+- On Debian Linux, dig is part of the dnsutils package.
+- Use AAAA instead of A in the dig command line to request the IPv6 address.
+
+## Modify address entries
+
+The code maps the domain "foo.bar.com" to the IPv4 adresse 192.168.1.1 and IPv6 address fe80::1.
+It is easy to find it in the code and to add other entries.
 
 ### Recommended Reading
 
