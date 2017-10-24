@@ -240,7 +240,7 @@ void print_hex(uint8_t* buf, size_t len)
 void print_resource_record(struct ResourceRecord* rr)
 {
   int i;
-  while(rr)
+  while (rr)
   {
     printf("  ResourceRecord { name '%s', type %u, class %u, ttl %u, rd_length %u, ",
         rr->name,
@@ -251,7 +251,7 @@ void print_resource_record(struct ResourceRecord* rr)
     );
 
     union ResourceData *rd = &rr->rd_data;
-    switch(rr->type)
+    switch (rr->type)
     {
       case A_Resource_RecordType:
         printf("Address Resource Record { address ");
@@ -262,12 +262,12 @@ void print_resource_record(struct ResourceRecord* rr)
         printf(" }");
         break;
       case NS_Resource_RecordType:
-        printf("Name Server Resource Record { name %s}",
+        printf("Name Server Resource Record { name %s }",
           rd->name_server_record.name
         );
         break;
       case CNAME_Resource_RecordType:
-        printf("Canonical Name Resource Record { name %u}",
+        printf("Canonical Name Resource Record { name %u }",
           rd->cname_record.name
         );
         break;
@@ -324,7 +324,7 @@ void print_query(struct Message* msg)
   printf(", ARcount: %u,\n", msg->arCount);
 
   struct Question* q = msg->questions;
-  while(q)
+  while (q)
   {
     printf("  Question { qName '%s', qType %u, qClass %u }\n",
       q->qName,
@@ -346,7 +346,8 @@ void print_query(struct Message* msg)
 * Basic memory operations.
 */
 
-size_t get16bits( const uint8_t** buffer ) {
+size_t get16bits( const uint8_t** buffer )
+{
   uint16_t value;
 
   memcpy( &value, *buffer, 2 );
@@ -355,18 +356,21 @@ size_t get16bits( const uint8_t** buffer ) {
   return ntohs( value );
 }
 
-void put8bits( uint8_t** buffer, uint8_t value ) {
+void put8bits( uint8_t** buffer, uint8_t value )
+{
   memcpy( *buffer, &value, 1 );
   *buffer += 1;
 }
 
-void put16bits( uint8_t** buffer, uint16_t value ) {
+void put16bits( uint8_t** buffer, uint16_t value )
+{
   value = htons( value );
   memcpy( *buffer, &value, 2 );
   *buffer += 2;
 }
 
-void put32bits( uint8_t** buffer, uint32_t value ) {
+void put32bits( uint8_t** buffer, uint32_t value )
+{
   value = htons( value );
   memcpy( *buffer, &value, 4 );
   *buffer += 4;
@@ -384,12 +388,13 @@ char* decode_domain_name(const uint8_t** buffer)
   const uint8_t* buf = *buffer;
   int j = 0;
   int i = 0;
-  while(buf[i] != 0)
+
+  while (buf[i] != 0)
   {
     //if(i >= buflen || i > sizeof(name))
     //  return NULL;
 
-    if(i != 0)
+    if (i != 0)
     {
       name[j] = '.';
       j += 1;
@@ -419,7 +424,7 @@ void encode_domain_name(uint8_t** buffer, const char* domain)
   int len = 0;
   int i = 0;
 
-  while((pos = strchr(beg, '.')))
+  while ((pos = strchr(beg, '.')))
   {
     len = pos - beg;
     buf[i] = len;
@@ -486,7 +491,7 @@ int decode_msg(struct Message* msg, const uint8_t* buffer, int size)
 
   decode_header(msg, &buffer);
 
-  if((msg->anCount + msg->nsCount) != 0)
+  if ((msg->anCount + msg->nsCount) != 0)
   {
     printf("Only questions expected!\n");
     return -1;
@@ -495,7 +500,7 @@ int decode_msg(struct Message* msg, const uint8_t* buffer, int size)
   // parse questions
   uint32_t qcount = msg->qdCount;
   struct Question* qs = msg->questions;
-  for(i = 0; i < qcount; ++i)
+  for (i = 0; i < qcount; ++i)
   {
     struct Question* q = malloc(sizeof(struct Question));
 
@@ -528,12 +533,12 @@ void resolver_process(struct Message* msg)
   msg->ra = 0; // no recursion available
   msg->rcode = Ok_ResponseType;
 
-  //should already be 0
+  // should already be 0
   msg->anCount = 0;
   msg->nsCount = 0;
   msg->arCount = 0;
 
-  //for every question append resource records
+  // for every question append resource records
   q = msg->questions;
   while(q)
   {
@@ -543,7 +548,7 @@ void resolver_process(struct Message* msg)
     rr->name = strdup(q->qName);
     rr->type = q->qType;
     rr->class = q->qClass;
-    rr->ttl = 60*60; //in seconds; 0 means no caching
+    rr->ttl = 60*60; // in seconds; 0 means no caching
 
     printf("Query for '%s'\n", q->qName);
 
@@ -551,12 +556,12 @@ void resolver_process(struct Message* msg)
     // and the answer (resource records) will be all put
     // into the answers list.
     // This behavior is probably non-standard!
-    switch(q->qType)
+    switch (q->qType)
     {
       case A_Resource_RecordType:
         rr->rd_length = 4;
         rc = get_A_Record(rr->rd_data.a_record.addr, q->qName);
-        if(rc < 0)
+        if (rc < 0)
         {
           free(rr->name);
           free(rr);
@@ -566,7 +571,7 @@ void resolver_process(struct Message* msg)
       case AAAA_Resource_RecordType:
         rr->rd_length = 16;
         rc = get_AAAA_Record(rr->rd_data.aaaa_record.addr, q->qName);
-        if(rc < 0)
+        if (rc < 0)
         {
           free(rr->name);
           free(rr);
@@ -607,7 +612,7 @@ void resolver_process(struct Message* msg)
 int encode_resource_records(struct ResourceRecord* rr, uint8_t** buffer)
 {
   int i;
-  while(rr)
+  while (rr)
   {
     // Answer questions by attaching resource sections.
     encode_domain_name(buffer, rr->name);
@@ -616,7 +621,7 @@ int encode_resource_records(struct ResourceRecord* rr, uint8_t** buffer)
     put32bits(buffer, rr->ttl);
     put16bits(buffer, rr->rd_length);
 
-    switch(rr->type)
+    switch (rr->type)
     {
       case A_Resource_RecordType:
         for(i = 0; i < 4; ++i)
@@ -633,6 +638,7 @@ int encode_resource_records(struct ResourceRecord* rr, uint8_t** buffer)
 
     rr = rr->next;
   }
+
   return 0;
 }
 
@@ -645,7 +651,7 @@ int encode_msg(struct Message* msg, uint8_t** buffer)
   encode_header(msg, buffer);
 
   q = msg->questions;
-  while(q)
+  while (q)
   {
     encode_domain_name(buffer, q->qName);
     put16bits(buffer, q->qType);
@@ -666,7 +672,7 @@ void free_resource_records(struct ResourceRecord* rr)
 {
   struct ResourceRecord* next;
 
-  while(rr) {
+  while (rr) {
     free(rr->name);
     next = rr->next;
     free(rr);
@@ -678,7 +684,7 @@ void free_questions(struct Question* qq)
 {
   struct Question* next;
 
-  while(qq) {
+  while (qq) {
     free(qq->qName);
     next = qq->next;
     free(qq);
@@ -708,7 +714,7 @@ int main()
 
   rc = bind(sock, (struct sockaddr*) &addr, addr_len);
 
-  if(rc != 0)
+  if (rc != 0)
   {
     printf("Could not bind: %s\n", strerror(errno));
     return 1;
@@ -716,7 +722,7 @@ int main()
 
   printf("Listening on port %u.\n", port);
 
-  while(1)
+  while (1)
   {
     free_questions(msg.questions);
     free_resource_records(msg.answers);
@@ -724,10 +730,9 @@ int main()
     free_resource_records(msg.additionals);
     memset(&msg, 0, sizeof(struct Message));
 
-    nbytes = recvfrom(sock, buffer, sizeof(buffer), 0,
-      (struct sockaddr *) &client_addr, &addr_len);
+    nbytes = recvfrom(sock, buffer, sizeof(buffer), 0, (struct sockaddr *) &client_addr, &addr_len);
 
-    if(decode_msg(&msg, buffer, nbytes) != 0) {
+    if (decode_msg(&msg, buffer, nbytes) != 0) {
       continue;
     }
 
@@ -740,7 +745,7 @@ int main()
     print_query(&msg);
 
     uint8_t *p = buffer;
-    if(encode_msg(&msg, &p) != 0) {
+    if (encode_msg(&msg, &p) != 0) {
       continue;
     }
 
