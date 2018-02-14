@@ -181,7 +181,7 @@ struct Message {
 
 int get_A_Record(uint8_t addr[4], const char domain_name[])
 {
-  if(strcmp("foo.bar.com", domain_name) == 0)
+  if (strcmp("foo.bar.com", domain_name) == 0)
   {
     addr[0] = 192;
     addr[1] = 168;
@@ -197,7 +197,7 @@ int get_A_Record(uint8_t addr[4], const char domain_name[])
 
 int get_AAAA_Record(uint8_t addr[16], const char domain_name[])
 {
-  if(strcmp("foo.bar.com", domain_name) == 0)
+  if (strcmp("foo.bar.com", domain_name) == 0)
   {
     addr[0] = 0xfe;
     addr[1] = 0x80;
@@ -248,7 +248,7 @@ void print_resource_record(struct ResourceRecord* rr)
         rr->class,
         rr->ttl,
         rr->rd_length
-    );
+   );
 
     union ResourceData *rd = &rr->rd_data;
     switch (rr->type)
@@ -264,12 +264,12 @@ void print_resource_record(struct ResourceRecord* rr)
       case NS_Resource_RecordType:
         printf("Name Server Resource Record { name %s }",
           rd->name_server_record.name
-        );
+       );
         break;
       case CNAME_Resource_RecordType:
         printf("Canonical Name Resource Record { name %u }",
           rd->cname_record.name
-        );
+       );
         break;
       case SOA_Resource_RecordType:
         printf("SOA { MName '%s', RName '%s', serial %u, refresh %u, retry %u, expire %u, minimum %u }",
@@ -280,23 +280,23 @@ void print_resource_record(struct ResourceRecord* rr)
           rd->soa_record.retry,
           rd->soa_record.expire,
           rd->soa_record.minimum
-        );
+       );
         break;
       case PTR_Resource_RecordType:
         printf("Pointer Resource Record { name '%s' }",
           rd->ptr_record.name
-        );
+       );
         break;
       case MX_Resource_RecordType:
         printf("Mail Exchange Record { preference %u, exchange '%s' }",
           rd->mx_record.preference,
           rd->mx_record.exchange
-        );
+       );
         break;
       case TXT_Resource_RecordType:
         printf("Text Resource Record { txt_data '%s' }",
           rd->txt_record.txt_data
-        );
+       );
         break;
       case AAAA_Resource_RecordType:
         printf("AAAA Resource Record { address ");
@@ -330,7 +330,7 @@ void print_query(struct Message* msg)
       q->qName,
       q->qType,
       q->qClass
-    );
+   );
     q = q->next;
   }
 
@@ -346,33 +346,33 @@ void print_query(struct Message* msg)
 * Basic memory operations.
 */
 
-size_t get16bits( const uint8_t** buffer )
+size_t get16bits(const uint8_t** buffer)
 {
   uint16_t value;
 
-  memcpy( &value, *buffer, 2 );
+  memcpy(&value, *buffer, 2);
   *buffer += 2;
 
-  return ntohs( value );
+  return ntohs(value);
 }
 
-void put8bits( uint8_t** buffer, uint8_t value )
+void put8bits(uint8_t** buffer, uint8_t value)
 {
-  memcpy( *buffer, &value, 1 );
+  memcpy(*buffer, &value, 1);
   *buffer += 1;
 }
 
-void put16bits( uint8_t** buffer, uint16_t value )
+void put16bits(uint8_t** buffer, uint16_t value)
 {
-  value = htons( value );
-  memcpy( *buffer, &value, 2 );
+  value = htons(value);
+  memcpy(*buffer, &value, 2);
   *buffer += 2;
 }
 
-void put32bits( uint8_t** buffer, uint32_t value )
+void put32bits(uint8_t** buffer, uint32_t value)
 {
-  value = htons( value );
-  memcpy( *buffer, &value, 4 );
+  value = htons(value);
+  memcpy(*buffer, &value, 4);
   *buffer += 4;
 }
 
@@ -391,7 +391,7 @@ char* decode_domain_name(const uint8_t** buffer)
 
   while (buf[i] != 0)
   {
-    //if(i >= buflen || i > sizeof(name))
+    //if (i >= buflen || i > sizeof(name))
     //  return NULL;
 
     if (i != 0)
@@ -491,7 +491,7 @@ int decode_msg(struct Message* msg, const uint8_t* buffer, int size)
 
   decode_header(msg, &buffer);
 
-  if ((msg->anCount + msg->nsCount) != 0)
+  if (msg->anCount != 0 || msg->nsCount != 0)
   {
     printf("Only questions expected!\n");
     return -1;
@@ -508,7 +508,7 @@ int decode_msg(struct Message* msg, const uint8_t* buffer, int size)
     q->qType = get16bits(&buffer);
     q->qClass = get16bits(&buffer);
 
-    //prepend question to questions list
+    // prepend question to questions list
     q->next = qs;
     msg->questions = q;
   }
@@ -540,7 +540,7 @@ void resolver_process(struct Message* msg)
 
   // for every question append resource records
   q = msg->questions;
-  while(q)
+  while (q)
   {
     rr = malloc(sizeof(struct ResourceRecord));
     memset(rr, 0, sizeof(struct ResourceRecord));
@@ -600,7 +600,7 @@ void resolver_process(struct Message* msg)
     msg->answers = rr;
     rr->next = beg;
 
-    //jump here to omit question
+    // ump here to omit question
     next:
 
     // process next question

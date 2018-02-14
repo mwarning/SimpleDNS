@@ -27,7 +27,7 @@ $./main
 Listening on port 9000.
 ```
 
-In another comsole window execute [dig](http://linux.die.net/man/1/dig):
+In another console execute [dig](http://linux.die.net/man/1/dig) to make a DNS request:
 
 ```
 $ dig @127.0.0.1 -p 9000 foo.bar.com A
