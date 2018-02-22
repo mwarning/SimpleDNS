@@ -600,7 +600,7 @@ void resolver_process(struct Message* msg)
     msg->answers = rr;
     rr->next = beg;
 
-    // ump here to omit question
+    // jump here to omit question
     next:
 
     // process next question
