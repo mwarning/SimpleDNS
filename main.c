@@ -316,6 +316,8 @@ void print_resource_record(struct ResourceRecord* rr)
 
 void print_query(struct Message* msg)
 {
+  struct Question* q;
+
   printf("QUERY { ID: %02x", msg->id);
   printf(". FIELDS: [ QR: %u, OpCode: %u ]", msg->qr, msg->opcode);
   printf(", QDcount: %u", msg->qdCount);
@@ -323,7 +325,7 @@ void print_query(struct Message* msg)
   printf(", NScount: %u", msg->nsCount);
   printf(", ARcount: %u,\n", msg->arCount);
 
-  struct Question* q = msg->questions;
+  q = msg->questions;
   while (q)
   {
     printf("  Question { qName '%s', qType %u, qClass %u }\n",
@@ -499,7 +501,6 @@ int decode_msg(struct Message* msg, const uint8_t* buffer, int size)
 
   // parse questions
   uint32_t qcount = msg->qdCount;
-  struct Question* qs = msg->questions;
   for (i = 0; i < qcount; ++i)
   {
     struct Question* q = malloc(sizeof(struct Question));
@@ -509,7 +510,7 @@ int decode_msg(struct Message* msg, const uint8_t* buffer, int size)
     q->qClass = get16bits(&buffer);
 
     // prepend question to questions list
-    q->next = qs;
+    q->next = msg->questions;
     msg->questions = q;
   }
 
