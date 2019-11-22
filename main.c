@@ -100,6 +100,7 @@ struct Question {
 /* Data part of a Resource Record */
 union ResourceData {
   struct {
+    uint8_t txt_data_len;
     char *txt_data;
   } txt_record;
   struct {
