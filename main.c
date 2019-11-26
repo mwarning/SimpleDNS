@@ -224,6 +224,18 @@ int get_AAAA_Record(uint8_t addr[16], const char domain_name[])
   }
 }
 
+int get_TXT_Record(char **addr, const char domain_name[])
+{
+  if (strcmp("foo.bar.com", domain_name) == 0)
+  {
+    *addr = "abcdefg";
+    return 0;
+  }
+  else
+  {
+    return -1;
+  }
+}
 
 /*
 * Debugging functions.
@@ -580,6 +592,17 @@ void resolver_process(struct Message* msg)
           goto next;
         }
         break;
+      case TXT_Resource_RecordType:
+        rc = get_TXT_Record(&(rr->rd_data.txt_record.txt_data), q->qName);
+        if (rc < 0)
+        {
+          free(rr->name);
+          free(rr);
+          goto next;
+        }
+        rr->rd_data.txt_record.txt_data_len = strlen(rr->rd_data.txt_record.txt_data);
+        rr->rd_length = strlen(rr->rd_data.txt_record.txt_data) + 1;
+        break;
       /*
       case NS_Resource_RecordType:
       case CNAME_Resource_RecordType:
@@ -632,6 +655,11 @@ int encode_resource_records(struct ResourceRecord* rr, uint8_t** buffer)
       case AAAA_Resource_RecordType:
         for(i = 0; i < 16; ++i)
           put8bits(buffer, rr->rd_data.aaaa_record.addr[i]);
+        break;
+      case TXT_Resource_RecordType:
+        put8bits(buffer, rr->rd_data.txt_record.txt_data_len);
+        for(i = 0; i < rr->rd_data.txt_record.txt_data_len; i++)
+          put8bits(buffer, rr->rd_data.txt_record.txt_data[i]);
         break;
       default:
         fprintf(stderr, "Unknown type %u. => Ignore resource record.\n", rr->type);
