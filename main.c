@@ -658,7 +658,7 @@ int encode_resource_records(struct ResourceRecord* rr, uint8_t** buffer)
         break;
       case TXT_Resource_RecordType:
         put8bits(buffer, rr->rd_data.txt_record.txt_data_len);
-        for (i = 0; i < rr->rd_data.txt_record.txt_data_len; i++)
+        for(i = 0; i < rr->rd_data.txt_record.txt_data_len; i++)
           put8bits(buffer, rr->rd_data.txt_record.txt_data[i]);
         break;
       default:
