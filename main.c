@@ -119,7 +119,7 @@ union ResourceData {
     char *name;
   } name_server_record;
   struct {
-    char name;
+    char* name;
   } cname_record;
   struct {
     char *name;
@@ -237,6 +237,19 @@ int get_TXT_Record(char **addr, const char domain_name[])
   }
 }
 
+int get_CNAME_Record(char **name, const char domain_name[])
+{
+  if (strcmp("cname.foo.bar.com", domain_name) == 0)
+  {
+    *name = "abc.efg.com";
+    return 0;
+  }
+  else
+  {
+    return -1;
+  }
+}
+
 /*
 * Debugging functions.
 */
@@ -280,7 +293,7 @@ void print_resource_record(struct ResourceRecord* rr)
        );
         break;
       case CNAME_Resource_RecordType:
-        printf("Canonical Name Resource Record { name %u }",
+        printf("Canonical Name Resource Record { name %s }",
           rd->cname_record.name
        );
         break;
@@ -356,7 +369,6 @@ void print_query(struct Message* msg)
   printf("}\n");
 }
 
-
 /*
 * Basic memory operations.
 */
@@ -390,7 +402,6 @@ void put32bits(uint8_t** buffer, uint32_t value)
   memcpy(*buffer, &value, 4);
   *buffer += 4;
 }
-
 
 /*
 * Deconding/Encoding functions.
@@ -600,9 +611,18 @@ void resolver_process(struct Message* msg)
           free(rr);
           goto next;
         }
-        int txt_data_len = strlen(rr->rd_data.txt_record.txt_data);
-        rr->rd_length = txt_data_len + 1;
-        rr->rd_data.txt_record.txt_data_len = txt_data_len;
+        rr->rd_data.txt_record.txt_data_len = strlen(rr->rd_data.txt_record.txt_data);
+        rr->rd_length = strlen(rr->rd_data.txt_record.txt_data) + 1;
+        break;
+      case CNAME_Resource_RecordType:
+        rc = get_CNAME_Record(&(rr->rd_data.cname_record.name), q->qName);
+        if (rc < 0)
+        {
+          free(rr->name);
+          free(rr);
+          goto next;
+        }
+        rr->rd_length = strlen(rr->rd_data.cname_record.name) + 2;
         break;
       /*
       case NS_Resource_RecordType:
@@ -661,6 +681,9 @@ int encode_resource_records(struct ResourceRecord* rr, uint8_t** buffer)
         put8bits(buffer, rr->rd_data.txt_record.txt_data_len);
         for(i = 0; i < rr->rd_data.txt_record.txt_data_len; i++)
           put8bits(buffer, rr->rd_data.txt_record.txt_data[i]);
+        break;
+      case CNAME_Resource_RecordType:
+        encode_domain_name(buffer, rr->rd_data.cname_record.name);
         break;
       default:
         fprintf(stderr, "Unknown type %u. => Ignore resource record.\n", rr->type);
