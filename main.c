@@ -229,7 +229,6 @@ int get_TXT_Record(char **addr, const char domain_name[])
   if (strcmp("foo.bar.com", domain_name) == 0)
   {
     *addr = "abcdefg";
-
     return 0;
   }
   else
@@ -237,7 +236,6 @@ int get_TXT_Record(char **addr, const char domain_name[])
     return -1;
   }
 }
-
 
 /*
 * Debugging functions.
@@ -602,14 +600,9 @@ void resolver_process(struct Message* msg)
           free(rr);
           goto next;
         }
-
-        rr->rd_data.txt_record.txt_data_len = (uint8_t)strlen(rr->rd_data.txt_record.txt_data);
-        rr->rd_length =  (uint16_t)strlen(rr->rd_data.txt_record.txt_data) + 1;
-
+        rr->rd_data.txt_record.txt_data_len = strlen(rr->rd_data.txt_record.txt_data);
+        rr->rd_length = strlen(rr->rd_data.txt_record.txt_data) + 1;
         break;
-
-
-
       /*
       case NS_Resource_RecordType:
       case CNAME_Resource_RecordType:
