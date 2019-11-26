@@ -9,6 +9,7 @@ Features:
 * single-threaded
 * all necessary data structures for further features
 * very simplistic memory management
+* supports A, AAAA and TXT queries
 * no full protection against malformed requests :|
 
 ### Build
