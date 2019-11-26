@@ -600,8 +600,9 @@ void resolver_process(struct Message* msg)
           free(rr);
           goto next;
         }
-        rr->rd_data.txt_record.txt_data_len = strlen(rr->rd_data.txt_record.txt_data);
-        rr->rd_length = strlen(rr->rd_data.txt_record.txt_data) + 1;
+        int txt_data_len = strlen(rr->rd_data.txt_record.txt_data);
+        rr->rd_length = txt_data_len + 1;
+        rr->rd_data.txt_record.txt_data_len = txt_data_len;
         break;
       /*
       case NS_Resource_RecordType:
