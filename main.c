@@ -182,24 +182,20 @@ struct Message {
 
 int get_A_Record(uint8_t addr[4], const char domain_name[])
 {
-  if (strcmp("foo.bar.com", domain_name) == 0)
-  {
+  if (strcmp("foo.bar.com", domain_name) == 0) {
     addr[0] = 192;
     addr[1] = 168;
     addr[2] = 1;
     addr[3] = 1;
     return 0;
-  }
-  else
-  {
+  } else {
     return -1;
   }
 }
 
 int get_AAAA_Record(uint8_t addr[16], const char domain_name[])
 {
-  if (strcmp("foo.bar.com", domain_name) == 0)
-  {
+  if (strcmp("foo.bar.com", domain_name) == 0) {
     addr[0] = 0xfe;
     addr[1] = 0x80;
     addr[2] = 0x00;
@@ -217,22 +213,17 @@ int get_AAAA_Record(uint8_t addr[16], const char domain_name[])
     addr[14] = 0x00;
     addr[15] = 0x01;
     return 0;
-  }
-  else
-  {
+  } else {
     return -1;
   }
 }
 
 int get_TXT_Record(char **addr, const char domain_name[])
 {
-  if (strcmp("foo.bar.com", domain_name) == 0)
-  {
+  if (strcmp("foo.bar.com", domain_name) == 0) {
     *addr = "abcdefg";
     return 0;
-  }
-  else
-  {
+  } else {
     return -1;
   }
 }
@@ -245,7 +236,7 @@ void print_hex(uint8_t* buf, size_t len)
 {
   int i;
   printf("%zu bytes:\n", len);
-  for(i = 0; i < len; ++i)
+  for (i = 0; i < len; ++i)
     printf("%02x ", buf[i]);
   printf("\n");
 }
@@ -253,19 +244,17 @@ void print_hex(uint8_t* buf, size_t len)
 void print_resource_record(struct ResourceRecord* rr)
 {
   int i;
-  while (rr)
-  {
+  while (rr) {
     printf("  ResourceRecord { name '%s', type %u, class %u, ttl %u, rd_length %u, ",
-        rr->name,
-        rr->type,
-        rr->class,
-        rr->ttl,
-        rr->rd_length
+      rr->name,
+      rr->type,
+      rr->class,
+      rr->ttl,
+      rr->rd_length
    );
 
     union ResourceData *rd = &rr->rd_data;
-    switch (rr->type)
-    {
+    switch (rr->type) {
       case A_Resource_RecordType:
         printf("Address Resource Record { address ");
 
@@ -280,7 +269,7 @@ void print_resource_record(struct ResourceRecord* rr)
        );
         break;
       case CNAME_Resource_RecordType:
-        printf("Canonical Name Resource Record { name %u }",
+        printf("Canonical Name Resource Record { name %s }",
           rd->cname_record.name
        );
         break;
@@ -339,13 +328,12 @@ void print_query(struct Message* msg)
   printf(", ARcount: %u,\n", msg->arCount);
 
   q = msg->questions;
-  while (q)
-  {
+  while (q) {
     printf("  Question { qName '%s', qType %u, qClass %u }\n",
       q->qName,
       q->qType,
       q->qClass
-   );
+    );
     q = q->next;
   }
 
@@ -404,13 +392,11 @@ char* decode_domain_name(const uint8_t** buffer)
   int j = 0;
   int i = 0;
 
-  while (buf[i] != 0)
-  {
+  while (buf[i] != 0) {
     //if (i >= buflen || i > sizeof(name))
     //  return NULL;
 
-    if (i != 0)
-    {
+    if (i != 0) {
       name[j] = '.';
       j += 1;
     }
@@ -439,8 +425,7 @@ void encode_domain_name(uint8_t** buffer, const char* domain)
   int len = 0;
   int i = 0;
 
-  while ((pos = strchr(beg, '.')))
-  {
+  while ((pos = strchr(beg, '.'))) {
     len = pos - beg;
     buf[i] = len;
     i += 1;
@@ -506,16 +491,14 @@ int decode_msg(struct Message* msg, const uint8_t* buffer, int size)
 
   decode_header(msg, &buffer);
 
-  if (msg->anCount != 0 || msg->nsCount != 0)
-  {
+  if (msg->anCount != 0 || msg->nsCount != 0) {
     printf("Only questions expected!\n");
     return -1;
   }
 
   // parse questions
   uint32_t qcount = msg->qdCount;
-  for (i = 0; i < qcount; ++i)
-  {
+  for (i = 0; i < qcount; ++i) {
     struct Question* q = malloc(sizeof(struct Question));
 
     q->qName = decode_domain_name(&buffer);
@@ -554,8 +537,7 @@ void resolver_process(struct Message* msg)
 
   // for every question append resource records
   q = msg->questions;
-  while (q)
-  {
+  while (q) {
     rr = malloc(sizeof(struct ResourceRecord));
     memset(rr, 0, sizeof(struct ResourceRecord));
 
@@ -570,8 +552,7 @@ void resolver_process(struct Message* msg)
     // and the answer (resource records) will be all put
     // into the answers list.
     // This behavior is probably non-standard!
-    switch (q->qType)
-    {
+    switch (q->qType) {
       case A_Resource_RecordType:
         rr->rd_length = 4;
         rc = get_A_Record(rr->rd_data.a_record.addr, q->qName);
@@ -594,8 +575,7 @@ void resolver_process(struct Message* msg)
         break;
       case TXT_Resource_RecordType:
         rc = get_TXT_Record(&(rr->rd_data.txt_record.txt_data), q->qName);
-        if (rc < 0)
-        {
+        if (rc < 0) {
           free(rr->name);
           free(rr);
           goto next;
@@ -638,8 +618,7 @@ void resolver_process(struct Message* msg)
 int encode_resource_records(struct ResourceRecord* rr, uint8_t** buffer)
 {
   int i;
-  while (rr)
-  {
+  while (rr) {
     // Answer questions by attaching resource sections.
     encode_domain_name(buffer, rr->name);
     put16bits(buffer, rr->type);
@@ -647,8 +626,7 @@ int encode_resource_records(struct ResourceRecord* rr, uint8_t** buffer)
     put32bits(buffer, rr->ttl);
     put16bits(buffer, rr->rd_length);
 
-    switch (rr->type)
-    {
+    switch (rr->type) {
       case A_Resource_RecordType:
         for(i = 0; i < 4; ++i)
           put8bits(buffer, rr->rd_data.a_record.addr[i]);
@@ -682,8 +660,7 @@ int encode_msg(struct Message* msg, uint8_t** buffer)
   encode_header(msg, buffer);
 
   q = msg->questions;
-  while (q)
-  {
+  while (q) {
     encode_domain_name(buffer, q->qName);
     put16bits(buffer, q->qType);
     put16bits(buffer, q->qClass);
@@ -745,16 +722,14 @@ int main()
 
   rc = bind(sock, (struct sockaddr*) &addr, addr_len);
 
-  if (rc != 0)
-  {
+  if (rc != 0) {
     printf("Could not bind: %s\n", strerror(errno));
     return 1;
   }
 
   printf("Listening on port %u.\n", port);
 
-  while (1)
-  {
+  while (1) {
     free_questions(msg.questions);
     free_resource_records(msg.answers);
     free_resource_records(msg.authorities);
