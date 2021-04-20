@@ -94,7 +94,7 @@ struct Question {
   char *qName;
   uint16_t qType;
   uint16_t qClass;
-  struct Question* next; // for linked list
+  struct Question *next; // for linked list
 };
 
 /* Data part of a Resource Record */
@@ -119,7 +119,7 @@ struct ResourceRecord {
   uint32_t ttl;
   uint16_t rd_length;
   union ResourceData rd_data;
-  struct ResourceRecord* next; // for linked list
+  struct ResourceRecord *next; // for linked list
 };
 
 struct Message {
@@ -140,16 +140,16 @@ struct Message {
   uint16_t arCount; /* Additional Record Count */
 
   /* At least one question; questions are copied to the response 1:1 */
-  struct Question* questions;
+  struct Question *questions;
 
   /*
   * Resource records to be send back.
   * Every resource record can be in any of the following places.
   * But every place has a different semantic.
   */
-  struct ResourceRecord* answers;
-  struct ResourceRecord* authorities;
-  struct ResourceRecord* additionals;
+  struct ResourceRecord *answers;
+  struct ResourceRecord *authorities;
+  struct ResourceRecord *additionals;
 };
 
 int get_A_Record(uint8_t addr[4], const char domain_name[])
@@ -204,7 +204,7 @@ int get_TXT_Record(char **addr, const char domain_name[])
 * Debugging functions.
 */
 
-void print_hex(uint8_t* buf, size_t len)
+void print_hex(uint8_t *buf, size_t len)
 {
   int i;
   printf("%zu bytes:\n", len);
@@ -213,7 +213,7 @@ void print_hex(uint8_t* buf, size_t len)
   printf("\n");
 }
 
-void print_resource_record(struct ResourceRecord* rr)
+void print_resource_record(struct ResourceRecord *rr)
 {
   int i;
   while (rr) {
@@ -256,9 +256,9 @@ void print_resource_record(struct ResourceRecord* rr)
   }
 }
 
-void print_query(struct Message* msg)
+void print_query(struct Message *msg)
 {
-  struct Question* q;
+  struct Question *q;
 
   printf("QUERY { ID: %02x", msg->id);
   printf(". FIELDS: [ QR: %u, OpCode: %u ]", msg->qr, msg->opcode);
@@ -289,7 +289,7 @@ void print_query(struct Message* msg)
 * Basic memory operations.
 */
 
-size_t get16bits(const uint8_t** buffer)
+size_t get16bits(const uint8_t **buffer)
 {
   uint16_t value;
 
@@ -299,20 +299,20 @@ size_t get16bits(const uint8_t** buffer)
   return ntohs(value);
 }
 
-void put8bits(uint8_t** buffer, uint8_t value)
+void put8bits(uint8_t **buffer, uint8_t value)
 {
   memcpy(*buffer, &value, 1);
   *buffer += 1;
 }
 
-void put16bits(uint8_t** buffer, uint16_t value)
+void put16bits(uint8_t **buffer, uint16_t value)
 {
   value = htons(value);
   memcpy(*buffer, &value, 2);
   *buffer += 2;
 }
 
-void put32bits(uint8_t** buffer, uint32_t value)
+void put32bits(uint8_t **buffer, uint32_t value)
 {
   value = htonl(value);
   memcpy(*buffer, &value, 4);
@@ -325,10 +325,10 @@ void put32bits(uint8_t** buffer, uint32_t value)
 */
 
 // 3foo3bar3com0 => foo.bar.com
-char* decode_domain_name(const uint8_t** buffer)
+char *decode_domain_name(const uint8_t **buffer)
 {
   char name[256];
-  const uint8_t* buf = *buffer;
+  const uint8_t *buf = *buffer;
   int j = 0;
   int i = 0;
 
@@ -357,11 +357,11 @@ char* decode_domain_name(const uint8_t** buffer)
 }
 
 // foo.bar.com => 3foo3bar3com0
-void encode_domain_name(uint8_t** buffer, const char* domain)
+void encode_domain_name(uint8_t **buffer, const char *domain)
 {
-  uint8_t* buf = *buffer;
-  const char* beg = domain;
-  const char* pos;
+  uint8_t *buf = *buffer;
+  const char *beg = domain;
+  const char *pos;
   int len = 0;
   int i = 0;
 
@@ -390,7 +390,7 @@ void encode_domain_name(uint8_t** buffer, const char* domain)
 }
 
 
-void decode_header(struct Message* msg, const uint8_t** buffer)
+void decode_header(struct Message *msg, const uint8_t **buffer)
 {
   msg->id = get16bits(buffer);
 
@@ -409,7 +409,7 @@ void decode_header(struct Message* msg, const uint8_t** buffer)
   msg->arCount = get16bits(buffer);
 }
 
-void encode_header(struct Message* msg, uint8_t** buffer)
+void encode_header(struct Message *msg, uint8_t **buffer)
 {
   put16bits(buffer, msg->id);
 
@@ -425,7 +425,7 @@ void encode_header(struct Message* msg, uint8_t** buffer)
   put16bits(buffer, msg->arCount);
 }
 
-int decode_msg(struct Message* msg, const uint8_t* buffer, int size)
+int decode_msg(struct Message *msg, const uint8_t *buffer, int size)
 {
   int i;
 
@@ -439,7 +439,7 @@ int decode_msg(struct Message* msg, const uint8_t* buffer, int size)
   // parse questions
   uint32_t qcount = msg->qdCount;
   for (i = 0; i < qcount; ++i) {
-    struct Question* q = malloc(sizeof(struct Question));
+    struct Question *q = malloc(sizeof(struct Question));
 
     q->qName = decode_domain_name(&buffer);
     q->qType = get16bits(&buffer);
@@ -457,11 +457,11 @@ int decode_msg(struct Message* msg, const uint8_t* buffer, int size)
 
 // For every question in the message add a appropiate resource record
 // in either section 'answers', 'authorities' or 'additionals'.
-void resolver_process(struct Message* msg)
+void resolver_process(struct Message *msg)
 {
-  struct ResourceRecord* beg;
-  struct ResourceRecord* rr;
-  struct Question* q;
+  struct ResourceRecord *beg;
+  struct ResourceRecord *rr;
+  struct Question *q;
   int rc;
 
   // leave most values intact for response
@@ -555,7 +555,7 @@ void resolver_process(struct Message* msg)
 }
 
 /* @return 0 upon failure, 1 upon success */
-int encode_resource_records(struct ResourceRecord* rr, uint8_t** buffer)
+int encode_resource_records(struct ResourceRecord *rr, uint8_t **buffer)
 {
   int i;
   while (rr) {
@@ -592,9 +592,9 @@ int encode_resource_records(struct ResourceRecord* rr, uint8_t** buffer)
 }
 
 /* @return 0 upon failure, 1 upon success */
-int encode_msg(struct Message* msg, uint8_t** buffer)
+int encode_msg(struct Message *msg, uint8_t **buffer)
 {
-  struct Question* q;
+  struct Question *q;
   int rc;
 
   encode_header(msg, buffer);
@@ -616,9 +616,9 @@ int encode_msg(struct Message* msg, uint8_t** buffer)
   return rc;
 }
 
-void free_resource_records(struct ResourceRecord* rr)
+void free_resource_records(struct ResourceRecord *rr)
 {
-  struct ResourceRecord* next;
+  struct ResourceRecord *next;
 
   while (rr) {
     free(rr->name);
@@ -628,9 +628,9 @@ void free_resource_records(struct ResourceRecord* rr)
   }
 }
 
-void free_questions(struct Question* qq)
+void free_questions(struct Question *qq)
 {
-  struct Question* next;
+  struct Question *next;
 
   while (qq) {
     free(qq->qName);
