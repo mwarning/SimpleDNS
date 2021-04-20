@@ -7,10 +7,9 @@ It was made to learn the basics of the DNS protocol.
 Features:
 * very small
 * single-threaded
-* all necessary data structures for further features
 * very simplistic memory management
 * supports A, AAAA and TXT queries
-* no full protection against malformed requests :|
+* no full protection against invalid requests :|
 
 ### Build
 
