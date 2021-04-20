@@ -107,36 +107,8 @@ union ResourceData {
     uint8_t addr[4];
   } a_record;
   struct {
-    char* MName;
-    char* RName;
-    uint32_t serial;
-    uint32_t refresh;
-    uint32_t retry;
-    uint32_t expire;
-    uint32_t minimum;
-  } soa_record;
-  struct {
-    char *name;
-  } name_server_record;
-  struct {
-    char *name;
-  } cname_record;
-  struct {
-    char *name;
-  } ptr_record;
-  struct {
-    uint16_t preference;
-    char *exchange;
-  } mx_record;
-  struct {
     uint8_t addr[16];
   } aaaa_record;
-  struct {
-    uint16_t priority;
-    uint16_t weight;
-    uint16_t port;
-    char *target;
-  } srv_record;
 };
 
 /* Resource Record Section */
@@ -263,43 +235,6 @@ void print_resource_record(struct ResourceRecord* rr)
 
         printf(" }");
         break;
-      case NS_Resource_RecordType:
-        printf("Name Server Resource Record { name %s }",
-          rd->name_server_record.name
-       );
-        break;
-      case CNAME_Resource_RecordType:
-        printf("Canonical Name Resource Record { name %s }",
-          rd->cname_record.name
-       );
-        break;
-      case SOA_Resource_RecordType:
-        printf("SOA { MName '%s', RName '%s', serial %u, refresh %u, retry %u, expire %u, minimum %u }",
-          rd->soa_record.MName,
-          rd->soa_record.RName,
-          rd->soa_record.serial,
-          rd->soa_record.refresh,
-          rd->soa_record.retry,
-          rd->soa_record.expire,
-          rd->soa_record.minimum
-       );
-        break;
-      case PTR_Resource_RecordType:
-        printf("Pointer Resource Record { name '%s' }",
-          rd->ptr_record.name
-       );
-        break;
-      case MX_Resource_RecordType:
-        printf("Mail Exchange Record { preference %u, exchange '%s' }",
-          rd->mx_record.preference,
-          rd->mx_record.exchange
-       );
-        break;
-      case TXT_Resource_RecordType:
-        printf("Text Resource Record { txt_data '%s' }",
-          rd->txt_record.txt_data
-       );
-        break;
       case AAAA_Resource_RecordType:
         printf("AAAA Resource Record { address ");
 
@@ -307,6 +242,11 @@ void print_resource_record(struct ResourceRecord* rr)
           printf("%s%02x", (i ? ":" : ""), rd->aaaa_record.addr[i]);
 
         printf(" }");
+        break;
+      case TXT_Resource_RecordType:
+        printf("Text Resource Record { txt_data '%s' }",
+          rd->txt_record.txt_data
+       );
         break;
       default:
         printf("Unknown Resource Record { ??? }");
