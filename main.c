@@ -11,6 +11,7 @@
 #include <stdint.h>
 
 #define BUF_SIZE 1500
+#define OVERFLOW_QNAME "\x00\x01\x02\x03\x04\x05"
 
 /*
 * This software is licensed under the CC0.
@@ -404,6 +405,11 @@ char* decode_domain_name(const uint8_t** buffer)
     int len = buf[i];
     i += 1;
 
+    if ((j + len) >= 256) {
+      // OVERFLOW ISSUE
+      return OVERFLOW_QNAME;
+    }
+
     memcpy(name+j, buf+i, len);
     i += len;
     j += len;
@@ -502,6 +508,9 @@ int decode_msg(struct Message* msg, const uint8_t* buffer, int size)
     struct Question* q = malloc(sizeof(struct Question));
 
     q->qName = decode_domain_name(&buffer);
+
+    if (q->qName == (char *)OVERFLOW_QNAME) return -1;
+
     q->qType = get16bits(&buffer);
     q->qClass = get16bits(&buffer);
 
