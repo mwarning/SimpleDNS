@@ -11,6 +11,8 @@
 #include <stdint.h>
 
 #define BUF_SIZE 1500
+#define MIN(x, y) ((x) <= (y) ? (x) : (y))
+
 
 /*
 * This software is licensed under the CC0.
@@ -324,36 +326,24 @@ void put32bits(uint8_t **buffer, uint32_t value)
 * Deconding/Encoding functions.
 */
 
-// 3foo3bar3com0 => foo.bar.com
-char *decode_domain_name(const uint8_t **buffer)
+// 3foo3bar3com0 => foo.bar.com (No full validation is done!)
+char *decode_domain_name(const uint8_t **buf, size_t len)
 {
-  char name[256];
-  const uint8_t *buf = *buffer;
-  int j = 0;
-  int i = 0;
-
-  while (buf[i] != 0) {
-    //if (i >= buflen || i > sizeof(name))
-    //  return NULL;
-
-    if (i != 0) {
-      name[j] = '.';
-      j += 1;
+  char domain[256];
+  for (int i = 1; i < MIN(256, len); i += 1) {
+    uint8_t c = (*buf)[i];
+    if (c == 0) {
+      domain[i - 1] = 0;
+      *buf += i + 1;
+      return strdup(domain);
+    } else if (c <= 63) {
+      domain[i - 1] = '.';
+    } else {
+      domain[i - 1] = c;
     }
-
-    int len = buf[i];
-    i += 1;
-
-    memcpy(name+j, buf+i, len);
-    i += len;
-    j += len;
   }
 
-  name[j] = '\0';
-
-  *buffer += i + 1; //also jump over the last 0
-
-  return strdup(name);
+  return NULL;
 }
 
 // foo.bar.com => 3foo3bar3com0
@@ -441,9 +431,14 @@ int decode_msg(struct Message *msg, const uint8_t *buffer, int size)
   for (i = 0; i < qcount; ++i) {
     struct Question *q = malloc(sizeof(struct Question));
 
-    q->qName = decode_domain_name(&buffer);
+    q->qName = decode_domain_name(&buffer, size);
     q->qType = get16bits(&buffer);
     q->qClass = get16bits(&buffer);
+
+    if (q->qName == NULL) {
+      printf("Failed to decode domain name!\n");
+      return -1;
+    }
 
     // prepend question to questions list
     q->next = msg->questions;
