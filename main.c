@@ -258,7 +258,7 @@ void print_resource_record(struct ResourceRecord *rr)
   }
 }
 
-void print_query(struct Message *msg)
+void print_message(struct Message *msg)
 {
   struct Question *q;
 
@@ -452,7 +452,7 @@ int decode_msg(struct Message *msg, const uint8_t *buffer, int size)
 
 // For every question in the message add a appropiate resource record
 // in either section 'answers', 'authorities' or 'additionals'.
-void resolver_process(struct Message *msg)
+void resolve_query(struct Message *msg)
 {
   struct ResourceRecord *beg;
   struct ResourceRecord *rr;
@@ -671,6 +671,7 @@ int main()
     free_resource_records(msg.additionals);
     memset(&msg, 0, sizeof(struct Message));
 
+    /* Receive DNS query */
     nbytes = recvfrom(sock, buffer, sizeof(buffer), 0, (struct sockaddr *) &client_addr, &addr_len);
 
     if (decode_msg(&msg, buffer, nbytes) != 0) {
@@ -678,18 +679,20 @@ int main()
     }
 
     /* Print query */
-    print_query(&msg);
+    print_message(&msg);
 
-    resolver_process(&msg);
+    /* Resolve query and put the answers into the query message */
+    resolve_query(&msg);
 
     /* Print response */
-    print_query(&msg);
+    print_message(&msg);
 
     uint8_t *p = buffer;
     if (encode_msg(&msg, &p) != 0) {
       continue;
     }
 
+    /* Send DNS response */
     int buflen = p - buffer;
     sendto(sock, buffer, buflen, 0, (struct sockaddr*) &client_addr, addr_len);
   }
