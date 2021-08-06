@@ -1,0 +1,3 @@
+[submodule "http-client-c"]
+	path = http-client-c
+	url = https://github.com/langhai/http-client-c
