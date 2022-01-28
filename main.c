@@ -232,7 +232,7 @@ void print_resource_record(struct ResourceRecord *rr)
       case A_Resource_RecordType:
         printf("Address Resource Record { address ");
 
-        for(i = 0; i < 4; ++i)
+        for (i = 0; i < 4; ++i)
           printf("%s%u", (i ? "." : ""), rd->a_record.addr[i]);
 
         printf(" }");
@@ -240,7 +240,7 @@ void print_resource_record(struct ResourceRecord *rr)
       case AAAA_Resource_RecordType:
         printf("AAAA Resource Record { address ");
 
-        for(i = 0; i < 16; ++i)
+        for (i = 0; i < 16; ++i)
           printf("%s%02x", (i ? ":" : ""), rd->aaaa_record.addr[i]);
 
         printf(" }");
@@ -248,7 +248,7 @@ void print_resource_record(struct ResourceRecord *rr)
       case TXT_Resource_RecordType:
         printf("Text Resource Record { txt_data '%s' }",
           rd->txt_record.txt_data
-       );
+        );
         break;
       default:
         printf("Unknown Resource Record { ??? }");
@@ -563,16 +563,16 @@ int encode_resource_records(struct ResourceRecord *rr, uint8_t **buffer)
 
     switch (rr->type) {
       case A_Resource_RecordType:
-        for(i = 0; i < 4; ++i)
+        for (i = 0; i < 4; ++i)
           put8bits(buffer, rr->rd_data.a_record.addr[i]);
         break;
       case AAAA_Resource_RecordType:
-        for(i = 0; i < 16; ++i)
+        for (i = 0; i < 16; ++i)
           put8bits(buffer, rr->rd_data.aaaa_record.addr[i]);
         break;
       case TXT_Resource_RecordType:
         put8bits(buffer, rr->rd_data.txt_record.txt_data_len);
-        for(i = 0; i < rr->rd_data.txt_record.txt_data_len; i++)
+        for (i = 0; i < rr->rd_data.txt_record.txt_data_len; i++)
           put8bits(buffer, rr->rd_data.txt_record.txt_data[i]);
         break;
       default:
