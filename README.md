@@ -1,7 +1,7 @@
 
 ### Introduction
 
-SimpleDNS is a very simple DNS server.
+SimpleDNS is a very simple DNS server written in C.
 It was made to learn the basics of the DNS protocol.
 
 Features:
@@ -63,3 +63,7 @@ It is easy to find it in the code and to add other entries.
 ### Recommended Reading
 
 The DNS section of the [TCP/IP-Guide](http://www.tcpipguide.com/free/t_TCPIPDomainNameSystemDNS.htm) was very helpful for understanding the protocol.
+
+## Similar Projects
+
+* https://github.com/wfelipe/simple-dns
