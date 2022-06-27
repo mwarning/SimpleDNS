@@ -642,7 +642,8 @@ int main()
   struct sockaddr_in client_addr;
   socklen_t addr_len = sizeof(struct sockaddr_in);
   struct sockaddr_in addr;
-  int nbytes, rc;
+  int rc;
+  ssize_t nbytes;
   int sock;
   int port = 9000;
 
