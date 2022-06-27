@@ -35,7 +35,7 @@ static const uint32_t OPCODE_MASK = 0x7800;
 static const uint32_t AA_MASK = 0x0400;
 static const uint32_t TC_MASK = 0x0200;
 static const uint32_t RD_MASK = 0x0100;
-static const uint32_t RA_MASK = 0x8000;
+static const uint32_t RA_MASK = 0x0080;
 static const uint32_t RCODE_MASK = 0x000F;
 
 /* Response Type */
