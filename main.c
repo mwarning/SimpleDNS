@@ -336,10 +336,10 @@ char *decode_domain_name(const uint8_t **buf, size_t len)
       domain[i - 1] = 0;
       *buf += i + 1;
       return strdup(domain);
-    } else if (c <= 63) {
-      domain[i - 1] = '.';
-    } else {
+    } else if ((c >= 'a' && c <= 'z') || c == '-') {
       domain[i - 1] = c;
+    } else {
+      domain[i - 1] = '.';
     }
   }
 
