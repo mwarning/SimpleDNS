@@ -674,7 +674,7 @@ void free_questions(struct Question *qq)
   }
 }
 
-int main()
+int main(int argc, char *argv[])
 {
   // buffer for input/output binary packet
   uint8_t buffer[BUFFER_SIZE];
@@ -684,7 +684,18 @@ int main()
   int rc;
   ssize_t nbytes;
   int sock;
-  int port = 9000;
+  int port = 9000; // Default port number
+
+  // Check if a port number is passed as an argument
+  if (argc > 1)
+  {
+    port = atoi(argv[1]); // Convert argument to integer and use it as the port number
+    if (port <= 0 || port > 65535)
+    {
+      printf("Invalid port number. Please provide a port number between 1 and 65535.\n");
+      return 1;
+    }
+  }
 
   struct Message msg;
   memset(&msg, 0, sizeof(struct Message));
