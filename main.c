@@ -539,6 +539,9 @@ void resolve_query(struct Message *msg)
   q = msg->questions;
   while (q)
   {
+    if (q->qName == NULL)
+      goto next;
+
     rr = malloc(sizeof(struct ResourceRecord));
     memset(rr, 0, sizeof(struct ResourceRecord));
 
@@ -593,6 +596,7 @@ void resolve_query(struct Message *msg)
     case TXT_Resource_RecordType:
     */
     default:
+      free(rr->name);
       free(rr);
       msg->rcode = NotImplemented_ResponseType;
       printf("Cannot answer question of type %d.\n", q->qType);
