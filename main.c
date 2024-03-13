@@ -310,12 +310,16 @@ void print_message(struct Message *msg)
  * Basic memory operations.
  */
 
-size_t get16bits(const uint8_t **buffer)
+size_t get16bits(const uint8_t **buffer, size_t *len)
 {
   uint16_t value;
 
+  if (*len < 2)
+    return 0;
+
   memcpy(&value, *buffer, 2);
   *buffer += 2;
+  *len -= 2;
 
   return ntohs(value);
 }
@@ -345,16 +349,20 @@ void put32bits(uint8_t **buffer, uint32_t value)
  */
 
 // 3foo3bar3com0 => foo.bar.com (No full validation is done!)
-char *decode_domain_name(const uint8_t **buf, size_t len)
+char *decode_domain_name(const uint8_t **buf, size_t *len)
 {
+  if (*len == 0)
+    return NULL;
+
   char domain[256];
-  for (int i = 1; i < MIN(256, len); i += 1)
+  for (int i = 1; i < MIN(256, *len); i += 1)
   {
     uint8_t c = (*buf)[i];
     if (c == 0)
     {
       domain[i - 1] = 0;
       *buf += i + 1;
+      *len -= i + 1;
       return strdup(domain);
     }
     else if ((c >= 'a' && c <= 'z') || c == '-')
@@ -404,11 +412,14 @@ void encode_domain_name(uint8_t **buffer, const char *domain)
   *buffer += i;
 }
 
-void decode_header(struct Message *msg, const uint8_t **buffer)
+bool decode_header(struct Message *msg, const uint8_t **buffer, size_t *size)
 {
-  msg->id = get16bits(buffer);
+  if (*size < 12)
+    return false;
 
-  uint32_t fields = get16bits(buffer);
+  msg->id = get16bits(buffer, size);
+
+  uint32_t fields = get16bits(buffer, size);
   msg->qr = (fields & QR_MASK) >> 15;
   msg->opcode = (fields & OPCODE_MASK) >> 11;
   msg->aa = (fields & AA_MASK) >> 10;
@@ -417,10 +428,12 @@ void decode_header(struct Message *msg, const uint8_t **buffer)
   msg->ra = (fields & RA_MASK) >> 7;
   msg->rcode = (fields & RCODE_MASK) >> 0;
 
-  msg->qdCount = get16bits(buffer);
-  msg->anCount = get16bits(buffer);
-  msg->nsCount = get16bits(buffer);
-  msg->arCount = get16bits(buffer);
+  msg->qdCount = get16bits(buffer, size);
+  msg->anCount = get16bits(buffer, size);
+  msg->nsCount = get16bits(buffer, size);
+  msg->arCount = get16bits(buffer, size);
+
+  return true;
 }
 
 void encode_header(struct Message *msg, uint8_t **buffer)
@@ -443,11 +456,8 @@ bool decode_msg(struct Message *msg, const uint8_t *buffer, size_t size)
 {
   int i;
 
-  if (size < 12)
+  if (decode_header(msg, &buffer, &size) == false)
     return false;
-
-  decode_header(msg, &buffer);
-  size -= 12;
 
   if (msg->anCount != 0 || msg->nsCount != 0)
   {
@@ -468,19 +478,15 @@ bool decode_msg(struct Message *msg, const uint8_t *buffer, size_t size)
     q->qName = NULL;
     msg->questions = q;
 
-    // Minimum size of 5 bytes, 1 byte for domain, 2 for the type and 2 for class
-    if (size < 5)
-      return false;
-
-    q->qName = decode_domain_name(&buffer, size - 4);
-    q->qType = get16bits(&buffer);
-    q->qClass = get16bits(&buffer);
-
+    q->qName = decode_domain_name(&buffer, &size);
     if (q->qName == NULL)
     {
       printf("Failed to decode domain name!\n");
       return false;
     }
+
+    q->qType = get16bits(&buffer, &size);
+    q->qClass = get16bits(&buffer, &size);
   }
 
   // We do not expect any resource records to parse here.
