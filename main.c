@@ -674,6 +674,26 @@ void free_questions(struct Question *qq)
   }
 }
 
+#ifdef FUZZER
+int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
+{
+  struct Message msg;
+  memset(&msg, 0, sizeof(struct Message));
+
+  // Assume `data` is a DNS query packet and `size` is its length.
+  // You might need to adapt this if your decode_msg function expects
+  // a different format or additional parameters.
+  decode_msg(&msg, data, size);
+
+  // Free any resources allocated by decode_msg to prevent memory leaks.
+  free_questions(msg.questions);
+  free_resource_records(msg.answers);
+  free_resource_records(msg.authorities);
+  free_resource_records(msg.additionals);
+
+  return 0; // Non-zero return values are reserved for future use.
+}
+#else
 int main(int argc, char *argv[])
 {
   // buffer for input/output binary packet
@@ -759,3 +779,4 @@ int main(int argc, char *argv[])
     sendto(sock, buffer, buflen, 0, (struct sockaddr *)&client_addr, addr_len);
   }
 }
+#endif
