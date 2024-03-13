@@ -420,6 +420,9 @@ bool decode_msg(struct Message *msg, const uint8_t *buffer, size_t size)
 {
   int i;
 
+  if (size < 12)
+    return false;
+
   decode_header(msg, &buffer);
 
   if (msg->anCount != 0 || msg->nsCount != 0) {
