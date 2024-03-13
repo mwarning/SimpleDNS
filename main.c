@@ -341,7 +341,7 @@ void put32bits(uint8_t **buffer, uint32_t value)
 }
 
 /*
- * Deconding/Encoding functions.
+ * Decoding/Encoding functions.
  */
 
 // 3foo3bar3com0 => foo.bar.com (No full validation is done!)
@@ -447,6 +447,7 @@ bool decode_msg(struct Message *msg, const uint8_t *buffer, size_t size)
     return false;
 
   decode_header(msg, &buffer);
+  size -= 12;
 
   if (msg->anCount != 0 || msg->nsCount != 0)
   {
@@ -459,8 +460,19 @@ bool decode_msg(struct Message *msg, const uint8_t *buffer, size_t size)
   for (i = 0; i < qcount; i += 1)
   {
     struct Question *q = malloc(sizeof(struct Question));
+    if (q == NULL)
+      return false;
 
-    q->qName = decode_domain_name(&buffer, size);
+    // prepend question to questions list
+    q->next = msg->questions;
+    q->qName = NULL;
+    msg->questions = q;
+
+    // Minimum size of 5 bytes, 1 byte for domain, 2 for the type and 2 for class
+    if (size < 5)
+      return false;
+
+    q->qName = decode_domain_name(&buffer, size - 4);
     q->qType = get16bits(&buffer);
     q->qClass = get16bits(&buffer);
 
@@ -469,10 +481,6 @@ bool decode_msg(struct Message *msg, const uint8_t *buffer, size_t size)
       printf("Failed to decode domain name!\n");
       return false;
     }
-
-    // prepend question to questions list
-    q->next = msg->questions;
-    msg->questions = q;
   }
 
   // We do not expect any resource records to parse here.
