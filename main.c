@@ -724,6 +724,15 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
   // a different format or additional parameters.
   decode_msg(&msg, data, size);
 
+  /* Print query */
+  print_message(&msg);
+
+  /* Resolve query and put the answers into the query message */
+  resolve_query(&msg);
+
+  /* Print response */
+  print_message(&msg);
+
   // Free any resources allocated by decode_msg to prevent memory leaks.
   free_questions(msg.questions);
   free_resource_records(msg.answers);
