@@ -231,16 +231,16 @@ bool get_AAAA_Record(uint8_t addr[16], const char domain_name[])
   return found;
 }
 
-int get_TXT_Record(char **addr, const char domain_name[])
+bool get_TXT_Record(char **addr, const char domain_name[])
 {
   if (strcmp("foo.bar.com", domain_name) == 0)
   {
     *addr = "abcdefg";
-    return 0;
+    return true;
   }
   else
   {
-    return -1;
+    return false;
   }
 }
 
