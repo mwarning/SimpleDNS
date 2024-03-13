@@ -167,46 +167,68 @@ struct Message
 
 bool get_A_Record(uint8_t addr[4], const char domain_name[])
 {
-  if (strcmp("foo.bar.com", domain_name) == 0)
+  struct addrinfo hints, *res, *p;
+  int status;
+  bool found = false;
+
+  memset(&hints, 0, sizeof(hints));
+  hints.ai_family = AF_INET;       // AF_INET for IPv4
+  hints.ai_socktype = SOCK_STREAM; // TCP - Stream socket
+
+  // Resolve the domain name to an IP address
+  if ((status = getaddrinfo(domain_name, NULL, &hints, &res)) != 0)
   {
-    addr[0] = 192;
-    addr[1] = 168;
-    addr[2] = 1;
-    addr[3] = 1;
-    return true;
-  }
-  else
-  {
+    fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(status));
     return false;
   }
+
+  // Loop through all the results and take the first IPv4 address found
+  for (p = res; p != NULL && !found; p = p->ai_next)
+  {
+    if (p->ai_family == AF_INET)
+    { // Check if the result is an IPv4 address
+      struct sockaddr_in *ipv4 = (struct sockaddr_in *)p->ai_addr;
+      memcpy(addr, &ipv4->sin_addr.s_addr, 4);
+      found = true;
+    }
+  }
+
+  freeaddrinfo(res); // Free the linked list
+
+  return found;
 }
 
 bool get_AAAA_Record(uint8_t addr[16], const char domain_name[])
 {
-  if (strcmp("foo.bar.com", domain_name) == 0)
+  struct addrinfo hints, *res, *p;
+  int status;
+  bool found = false;
+
+  memset(&hints, 0, sizeof(hints));
+  hints.ai_family = AF_INET6;      // AF_INET for IPv6
+  hints.ai_socktype = SOCK_STREAM; // TCP - Stream socket
+
+  // Resolve the domain name to an IP address
+  if ((status = getaddrinfo(domain_name, NULL, &hints, &res)) != 0)
   {
-    addr[0] = 0xfe;
-    addr[1] = 0x80;
-    addr[2] = 0x00;
-    addr[3] = 0x00;
-    addr[4] = 0x00;
-    addr[5] = 0x00;
-    addr[6] = 0x00;
-    addr[7] = 0x00;
-    addr[8] = 0x00;
-    addr[9] = 0x00;
-    addr[10] = 0x00;
-    addr[11] = 0x00;
-    addr[12] = 0x00;
-    addr[13] = 0x00;
-    addr[14] = 0x00;
-    addr[15] = 0x01;
-    return true;
-  }
-  else
-  {
+    fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(status));
     return false;
   }
+
+  // Loop through all the results and take the first IPv6 address found
+  for (p = res; p != NULL && !found; p = p->ai_next)
+  {
+    if (p->ai_family == AF_INET6)
+    { // Check if the result is an IPv6 address
+      struct sockaddr_in6 *ipv6 = (struct sockaddr_in6 *)p->ai_addr;
+      memcpy(addr, &ipv6->sin6_addr, 16);
+      found = true;
+    }
+  }
+
+  freeaddrinfo(res); // Free the linked list
+
+  return found;
 }
 
 int get_TXT_Record(char **addr, const char domain_name[])
