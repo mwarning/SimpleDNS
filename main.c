@@ -433,7 +433,7 @@ bool decode_msg(struct Message *msg, const uint8_t *buffer, size_t size)
   // parse questions
   uint32_t qcount = msg->qdCount;
   for (i = 0; i < qcount; i += 1) {
-    struct Question *q = malloc(sizeof(struct Question));
+    struct Question *q = calloc(1, sizeof(struct Question));
 
     q->qName = decode_domain_name(&buffer, size);
     q->qType = get16bits(&buffer);
@@ -476,8 +476,7 @@ void resolve_query(struct Message *msg)
   // for every question append resource records
   q = msg->questions;
   while (q) {
-    rr = malloc(sizeof(struct ResourceRecord));
-    memset(rr, 0, sizeof(struct ResourceRecord));
+    rr = calloc(1, sizeof(struct ResourceRecord));
 
     rr->name = strdup(q->qName);
     rr->type = q->qType;
