@@ -337,7 +337,7 @@ char *decode_domain_name(const uint8_t **buf, size_t len)
       domain[i - 1] = 0;
       *buf += i + 1;
       return strdup(domain);
-    } else if ((c >= 'a' && c <= 'z') || c == '-') {
+    } else if ((c >= 'a' && c <= 'z') || c == '-' || (c >= '0' && c <= '9')) {
       domain[i - 1] = c;
     } else {
       domain[i - 1] = '.';
