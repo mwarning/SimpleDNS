@@ -525,6 +525,7 @@ void resolve_query(struct Message *msg)
       case TXT_Resource_RecordType:
       */
       default:
+        free(rr->name);
         free(rr);
         msg->rcode = NotImplemented_ResponseType;
         printf("Cannot answer question of type %d.\n", q->qType);
